@@ -1,0 +1,343 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700;800&display=swap");
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family:Epilogue;
+   
+}
+
+/* border: solid;;
+border-width:2px;
+border-color: black; */
+
+
+
+
+
+nav{
+    display: flex;
+    justify-content: flex-end;
+    padding: 30px 0 0 0;
+    margin-top: 10px;
+  
+}
+
+nav ul{
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+
+    gap:20px;
+}
+
+nav li{
+    color:black;
+    font-size:1.1vw;
+    margin-right: 40px;
+}
+
+
+
+
+
+.home{
+    margin: auto;
+    margin-top:10vh;
+    margin-bottom: 25vh;
+
+    padding:25px;
+
+    gap:4vw;
+
+    display:flex;
+
+    justify-content: center;
+    align-items: center;
+
+
+    height:auto;
+    width:85vw;
+
+
+}
+
+.info{
+    display: flex;
+    flex:0 1 1;
+    flex-direction: column;
+
+
+    min-width: 250px;
+
+    justify-content: center;
+    gap:25px;
+    
+
+    width: 35vw;
+    height:60vh;
+
+
+}
+
+.info h4{
+    font-size: 2vw;
+
+}
+
+.info h1{
+    font-weight: 800 ;
+    font-size: 5vw;
+    text-shadow: 3px 2px 2px rgba(128, 128, 128, 0.32);
+
+}
+
+.info h3{
+    font-size: 1.5vw;
+}
+
+.info p{
+    font-size: 1.1vw;
+}
+
+.info button{
+    height:7vh;
+    width:12vw;
+
+    border-radius: 25px;;
+    background-color: #12202D;
+
+    color: white;
+    font-size: 2vh;
+    font-weight: 800;
+
+    border:none
+}
+
+.relative{
+    position: relative;
+}
+
+.relative .dots{
+    height: 22vh;
+    width: auto;
+
+    position: absolute;
+    z-index: -1;
+
+    top:-70px;
+    left:-80px;
+}
+
+.photo{
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    min-width: 250px;
+
+    width: 35vw;
+    height: 60vh;
+
+
+}
+
+.photo img{
+    height: 60vh;
+    width: auto;
+
+    border-radius: 65px
+}
+
+
+
+
+
+
+.skills{
+    display: flex;
+    flex-direction: column;
+
+}
+
+
+
+.grid-container {
+    display: grid;
+
+    grid-template-columns: auto auto auto auto;
+    grid-template-rows: auto auto auto auto;
+
+    justify-content: space-evenly;
+    
+    width: 75vw;
+    height: auto;
+
+    margin: auto;
+
+    margin-bottom: 20vh;
+
+    border: solid;
+    border-width: 12px;
+    border-color: black;
+
+    border-radius: 10px;;
+
+    padding: 50px;
+    row-gap: 6vh;
+    column-gap: 0vh;
+}
+
+.grid-container h2{
+
+    justify-self: center;
+    align-self: center;
+
+
+    font-size: 5vw;
+    margin: auto;
+    grid-column: 1/5;
+
+
+
+}
+
+.grid-container hr{
+    grid-column: 1/5;
+
+    border-top: 3px solid #000000
+}
+
+
+.grid-container h1{
+
+    font-size: 1.5vw;
+    margin: auto;
+
+    
+}
+
+
+.card{
+
+    padding: 10px;;
+
+    border: solid;
+    border-width: 4px;
+    border-color: black;
+
+    border-radius: 30px;
+
+    
+    box-shadow: 12px 12px rgba(0, 0, 0, 1);
+    /* rgb is to give box shadow color 0,0,0 and 1 is opacity  */
+
+
+
+    height: 8vw;
+    width: 8vw;
+
+
+
+}
+
+.tryCard img{
+
+    height: 100%;
+    width: 100%
+}
+
+
+
+
+
+.projects{
+    margin: auto;
+    margin-bottom: 25vh;
+
+    padding:25px;
+
+    display:flex;
+    flex-direction: column;
+    
+
+    justify-content: center;
+    align-items: center;
+
+    gap:12vh;
+
+
+    height:auto;
+    width:100%;
+
+    border-radius: 25px; 
+    
+
+}
+
+.projects h1{
+    font-size: 4.5vw;
+}
+
+.projectrow{
+    display:flex;
+    flex-direction: row;
+
+    width: 100%;
+
+    justify-content: center;
+    align-items: center;
+
+
+
+}
+
+.projectrow img{
+    height:50%;
+    width:50%;
+}
+
+
+
+
+.projectcol{
+    display:flex;
+    flex-direction: column;
+
+    height:20vw;
+    width:30vw;
+    justify-content:space-evenly;
+    align-items:flex-start;
+
+
+}
+
+
+.projectcol h1{
+    font-size: 3vw;
+}
+
+.projectcol p{
+    font-size:1.2vw;
+    line-height: 1.2;
+}
+
+.projectcol button{
+    height:7vh;
+    width:12vw;
+
+    border-radius: 25px;;
+    background-color: #12202D;
+
+    color: white;
+    font-size: 2vh;
+    font-weight: 800;
+
+    border:none
+}
+

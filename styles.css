@@ -9,6 +9,11 @@
    
 }
 
+
+html {
+    scroll-behavior: smooth;
+  }
+
 /* border: solid;;
 border-width:2px;
 border-color: black; */
@@ -104,7 +109,7 @@ nav li{
 }
 
 .info button{
-    height:7vh;
+    height:3.6vw;
     width:12vw;
 
     border-radius: 25px;;
@@ -162,6 +167,8 @@ nav li{
 .skills{
     display: flex;
     flex-direction: column;
+    padding-top:10vh;
+    background-color: white;
 
 }
 
@@ -183,10 +190,12 @@ nav li{
     margin-bottom: 20vh;
 
     border: solid;
-    border-width: 12px;
+    border-width: 2px;
     border-color: black;
 
     border-radius: 10px;;
+
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 24px 38px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 
     padding: 50px;
     row-gap: 6vh;
@@ -246,7 +255,7 @@ nav li{
 
 }
 
-.tryCard img{
+.card img{
 
     height: 100%;
     width: 100%

@@ -45,6 +45,20 @@ nav li{
     margin-right: 40px;
 }
 
+nav ul a{
+    text-decoration: underline;
+    text-decoration-color: transparent;
+
+    transition: 0.7s;
+
+}
+
+nav ul a:hover{
+    
+    text-decoration-color: #26303C;
+
+}
+
 
 
 
@@ -119,7 +133,21 @@ nav li{
     font-size: 2vh;
     font-weight: 800;
 
-    border:none
+    border: solid;
+    border-color: #12202D;
+    border-width: 2px;
+
+    cursor: pointer;
+
+    transition: 0.5s;
+
+}
+
+
+.info button:hover{
+
+    transform: translate(0px, -7px);
+
 }
 
 .relative{
@@ -144,10 +172,9 @@ nav li{
     justify-content: center;
     align-items: center;
 
-    min-width: 250px;
 
-    width: 35vw;
-    height: 60vh;
+    width: 27vw;
+    height: 52vh;
 
 
 }
@@ -167,7 +194,7 @@ nav li{
 .skills{
     display: flex;
     flex-direction: column;
-    padding-top:10vh;
+    padding-top:8vh;
     background-color: white;
 
 }
@@ -251,6 +278,8 @@ nav li{
     height: 8vw;
     width: 8vw;
 
+    transition: 0.5s;
+
 
 
 }
@@ -261,6 +290,10 @@ nav li{
     width: 100%
 }
 
+.card:hover{
+    transform: translate(0px, -7px);
+
+}
 
 
 
@@ -309,6 +342,7 @@ nav li{
 .projectrow img{
     height:50%;
     width:50%;
+
 }
 
 
@@ -328,6 +362,8 @@ nav li{
 
 
 .projectcol h1{
+    color: #12202D;
+
     font-size: 3vw;
 }
 
@@ -347,6 +383,36 @@ nav li{
     font-size: 2vh;
     font-weight: 800;
 
-    border:none
+    border: solid;
+    border-color: #12202D;
+    border-width: 2px;
+
+    cursor: pointer;
+    transition: 0.5s;
+
 }
 
+.projectcol button:hover{
+
+    transform: translate(0px, -7px);
+
+}
+
+
+#github{
+    background-color: white;
+    background-image: 
+    url("https://cdn-icons-png.flaticon.com/512/25/25231.png") 100% 100%;
+    height: 3.2vw;
+    width: 3.2vw;
+    border-radius: 50%;
+    margin-left: 1vw;
+
+    cursor: pointer;
+    transition: 0.5s;
+
+}
+
+#github:hover{
+    transform: translate(0px, -7px);
+}

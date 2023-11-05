@@ -25,10 +25,13 @@ border-color: black; */
 nav{
     display: flex;
     justify-content: flex-end;
+
+    width: 100vw;
     padding: 30px 0 0 0;
     margin-top: 10px;
   
 }
+
 
 nav ul{
     margin-top: 10px;
@@ -58,6 +61,7 @@ nav ul a:hover{
     text-decoration-color: #26303C;
 
 }
+
 
 
 

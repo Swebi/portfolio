@@ -186,18 +186,18 @@ export default function Page() {
           </BlurFade>
           <BlurFade delay={BLUR_FADE_DELAY * 14}>
             <ul className="mb-4 ml-4 divide-y divide-dashed border-l">
-              {DATA.volunteering.map((project, id) => (
+              {DATA.volunteering.map((volunteer, id) => (
                 <BlurFade
-                  key={project.title + project.dates}
+                  key={volunteer.title + volunteer.dates}
                   delay={BLUR_FADE_DELAY * 15 + id * 0.05}
                 >
                   <HackathonCard
-                    title={project.title}
-                    description={project.description}
-                    location={project.location}
-                    dates={project.dates}
-                    image={project.image}
-                    links={project.links}
+                    title={volunteer.title}
+                    description={volunteer.description}
+                    location={volunteer.location}
+                    dates={volunteer.dates}
+                    image={volunteer.image}
+                    links={volunteer.links}
                   />
                 </BlurFade>
               ))}

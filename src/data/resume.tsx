@@ -103,7 +103,7 @@ export const DATA = {
       school: "SRM Institute Of Science & Technology",
       href: "https://www.srmist.edu.in",
       degree: "B.Tech CSE IOT",
-      description: "9.33 CGPA",
+      description: "9.38 CGPA",
       logoUrl: "/srm.png",
       start: "2023",
       end: "2027",

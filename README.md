@@ -70,6 +70,7 @@ Notion CMS
    NOTION_TOKEN = <Integration Secret>  
    NOTION_PORTFOLIO = <Portfolio DB ID>  
    NOTION_PERSONAL = <Personal DB ID>  
+   REVALIDATE = <Time Interval for ISR in seconds>
    ```
 4. Start the server:
    ```sh

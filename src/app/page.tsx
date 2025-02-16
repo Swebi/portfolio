@@ -15,7 +15,7 @@ import Markdown from "react-markdown";
 
 const BLUR_FADE_DELAY = 0.04;
 
-const time = parseInt(process.env.REVALIDATE ?? "60", 10);
+const time = parseInt(process.env.REVALIDATE ?? "604800", 10);
 
 export const revalidate = time;
 

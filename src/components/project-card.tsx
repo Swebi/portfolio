@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import Markdown from "react-markdown";
+import { Icons } from "@/components/icons";
+import { Github, Globe } from "lucide-react";
 
 interface Props {
   title: string;
@@ -20,11 +22,8 @@ interface Props {
   link?: string;
   image?: string;
   video?: string;
-  links?: readonly {
-    icon: React.ReactNode;
-    type: string;
-    href: string;
-  }[];
+  url: string;
+  source: string;
   className?: string;
 }
 
@@ -37,7 +36,8 @@ export function ProjectCard({
   link,
   image,
   video,
-  links,
+  url,
+  source,
   className,
 }: Props) {
   return (
@@ -98,18 +98,24 @@ export function ProjectCard({
         )}
       </CardContent>
       <CardFooter className="px-2 pb-2">
-        {links && links.length > 0 && (
-          <div className="flex flex-row flex-wrap items-start gap-1">
-            {links?.map((link, idx) => (
-              <Link href={link?.href} key={idx} target="_blank">
-                <Badge key={idx} className="flex gap-2 px-2 py-1 text-[10px]">
-                  {link.icon}
-                  {link.type}
-                </Badge>
-              </Link>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-row flex-wrap items-start gap-1">
+          {url && (
+            <Link href={url} key={url} target="_blank">
+              <Badge key={url} className="flex gap-2 px-2 py-1 text-[10px]">
+                <Globe className="h-4 w-4" />
+                <p>Website</p>
+              </Badge>
+            </Link>
+          )}
+          {source && (
+            <Link href={source} key={source} target="_blank">
+              <Badge key={source} className="flex gap-2 px-2 py-1 text-[10px]">
+                <Github className="h-4 w-4" />
+                <p>Source</p>
+              </Badge>
+            </Link>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

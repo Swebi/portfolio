@@ -12,24 +12,17 @@ import { getPersonal, getPortfolio } from "@/lib/notion";
 import { getFormattedDate } from "@/lib/utils";
 import Link from "next/link";
 import Markdown from "react-markdown";
-import { PageProps } from "@/lib/interface";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export async function getStaticProps() {
+const time = parseInt(process.env.REVALIDATE ?? "60", 10);
+
+export const revalidate = time;
+
+export default async function Page() {
   const personal = await getPersonal();
   const portfolio = await getPortfolio();
 
-  return {
-    props: {
-      personal,
-      portfolio,
-    },
-    revalidate: process.env.REVALIDATE,
-  };
-}
-
-export default function Page({ personal, portfolio }: PageProps) {
   const workData = portfolio.filter(
     (data) => data.category === "Work" && data.active
   );

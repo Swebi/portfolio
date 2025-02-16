@@ -138,7 +138,7 @@ export default async function Page() {
         </BlurFade> */}
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <div className="flex gap-2 flex-wrap max-w-xl mt-2">
-            <GithubCard />
+            <GithubCard username={personal.githubid} />
           </div>
         </BlurFade>
       </section>

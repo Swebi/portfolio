@@ -37,6 +37,7 @@ export const getPersonal = cache(async () => {
       phone: properties["Phone Number"]?.phone_number || "",
       url: properties.URL?.url || "",
       github: properties.GitHub?.url || "",
+      githubid: properties.githubid?.rich_text[0]?.plain_text || "",
       linkedin: properties.Linkedin?.url || "",
       twitter: properties.Twitter?.url || "",
       instagram: properties.Instagram?.url || "",

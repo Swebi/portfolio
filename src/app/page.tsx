@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getPersonal, getPortfolio } from "@/lib/notion";
 import { getFormattedDate } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import Markdown from "react-markdown";
 
@@ -55,10 +56,21 @@ export default async function Page() {
               />
             </div>
             <BlurFade delay={BLUR_FADE_DELAY}>
-              <Avatar className="size-28 border">
+              {/* <Avatar className="size-28 border">
                 <AvatarImage alt={personal.name} src={personal.avatar} />
                 <AvatarFallback>{personal.initials}</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
+              <div className="relative w-28 h-28 rounded-full border  overflow-hidden">
+                <Image
+                  src={personal.avatar || "/placeholder.svg"}
+                  alt="Avatar"
+                  fill
+                  sizes="1000px"
+                  style={{
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
             </BlurFade>
           </div>
         </div>

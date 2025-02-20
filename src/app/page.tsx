@@ -62,7 +62,7 @@ export default async function Page() {
               </Avatar> */}
               <div className="relative w-28 h-28 rounded-full border  overflow-hidden">
                 <Image
-                  src={personal.avatar || "/placeholder.svg"}
+                  src={personal.avatar || "/me.jpeg"}
                   alt="Avatar"
                   fill
                   sizes="1000px"

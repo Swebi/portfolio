@@ -14,17 +14,6 @@ export const getPersonal = cache(async () => {
   const data = response.results.map((page: PageObjectResponse | any) => {
     const properties = page.properties;
 
-    const extractFileUrl = (filesArray: any[]) => {
-      if (!filesArray || filesArray.length === 0) return "";
-      const fileObject = filesArray[0];
-
-      return fileObject.type === "file"
-        ? fileObject.file.url
-        : fileObject.type === "external"
-        ? fileObject.external.url
-        : "";
-    };
-
     return {
       id: page.id,
       name: properties.Name?.title[0]?.plain_text || "Untitled",
@@ -64,24 +53,13 @@ export const getPortfolio = cache(async () => {
   const data = response.results.map((page: PageObjectResponse | any) => {
     const properties = page.properties;
 
-    const extractFileUrl = (filesArray: any[]) => {
-      if (!filesArray || filesArray.length === 0) return "";
-      const fileObject = filesArray[0];
-
-      return fileObject.type === "file"
-        ? fileObject.file.url
-        : fileObject.type === "external"
-        ? fileObject.external.url
-        : "";
-    };
-
     return {
       id: page.id,
       title: properties.Title?.title[0]?.plain_text || "Untitled",
       subtitle: properties.Subtitle?.rich_text[0]?.plain_text || "",
       description: properties.Description?.rich_text[0]?.plain_text || "",
       logoUrl: properties.Logo?.url || "",
-      imageUrl: properties.Image?.url || "",
+      mediaUrl: properties["Media URL"]?.url || "",
       url: properties.URL?.url || "",
       source: properties.Source?.url || "",
       category: properties.Category?.select?.name || "Uncategorized",

@@ -20,7 +20,7 @@ interface PortfolioItem {
   endDate: string;
   description: string;
   technologies: string[];
-  imageUrl: string;
+  mediaUrl: string;
   source: string;
   location: string;
 }

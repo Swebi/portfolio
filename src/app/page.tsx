@@ -18,7 +18,7 @@ import Markdown from "react-markdown";
 
 const BLUR_FADE_DELAY = 0.04;
 
-const time = parseInt(process.env.REVALIDATE ?? "3600", 10);
+const time = parseInt(process.env.REVALIDATE ?? "86400", 10);
 
 export const revalidate = time;
 
@@ -196,7 +196,8 @@ export default async function Page() {
                   description={project.description}
                   dates={getFormattedDate(project.startDate)}
                   tags={project.technologies}
-                  image={project.imageUrl}
+                  image={project.mediaUrl && !/\.(mp4|webm|mov)$/i.test(project.mediaUrl) ? project.mediaUrl : undefined}
+                  video={project.mediaUrl && /\.(mp4|webm|mov)$/i.test(project.mediaUrl) ? project.mediaUrl : undefined}
                   url={project.url}
                   source={project.source}
                 />

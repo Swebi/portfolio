@@ -1,5 +1,9 @@
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ClickEffect } from "@/components/ui/click-effect";
+import { CustomCursor } from "@/components/ui/custom-cursor";
+import { Grain } from "@/components/ui/grain";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
@@ -66,6 +70,10 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="light">
           <TooltipProvider delayDuration={0}>
+            <CustomCursor />
+            <ScrollProgress />
+            <ClickEffect />
+            <Grain />
             {children}
             <Navbar />
           </TooltipProvider>

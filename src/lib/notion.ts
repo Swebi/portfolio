@@ -55,9 +55,9 @@ export const getPortfolio = cache(async () => {
 
     return {
       id: page.id,
-      title: properties.Title?.title[0]?.plain_text || "Untitled",
-      subtitle: properties.Subtitle?.rich_text[0]?.plain_text || "",
-      description: properties.Description?.rich_text[0]?.plain_text || "",
+      title: properties.Title?.title?.map((t: any) => t.plain_text).join("").trim() || "Untitled",
+      subtitle: properties.Subtitle?.rich_text?.map((t: any) => t.plain_text).join("") || "",
+      description: properties.Description?.rich_text?.map((t: any) => t.plain_text).join("") || "",
       logoUrl: properties.Logo?.url || "",
       mediaUrl: properties["Media URL"]?.url || "",
       url: properties.URL?.url || "",

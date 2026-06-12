@@ -4,7 +4,7 @@ interface GrainProps {
   opacity?: number;
 }
 
-export function Grain({ opacity = 0.045 }: GrainProps) {
+export function Grain({ opacity = 0.030 }: GrainProps) {
   return (
     <div
       aria-hidden="true"

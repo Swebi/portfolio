@@ -4,6 +4,7 @@ import MapComponent from "@/components/location-card";
 import LocationCard from "@/components/location-card";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
+import { CompanyResumeCard } from "@/components/company-resume-card";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +30,16 @@ export default async function Page() {
   const workData = portfolio.filter(
     (data) => data.category === "Work" && data.active
   );
+
+  // Group by company name, preserving descending start-date order
+  const workGroups = (() => {
+    const map = new Map<string, typeof workData>();
+    for (const work of workData) {
+      if (!map.has(work.title)) map.set(work.title, []);
+      map.get(work.title)!.push(work);
+    }
+    return Array.from(map.values());
+  })();
   const educationData = portfolio.filter(
     (data) => data.category === "Education" && data.active
   );
@@ -88,24 +99,44 @@ export default async function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 5}>
             <h2 className="text-xl font-bold">Work Experience</h2>
           </BlurFade>
-          {workData.map((work, id) => (
-            <BlurFade key={work.title} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
-              <ResumeCard
-                key={work.id}
-                logoUrl={work.logoUrl}
-                altText={work.title}
-                title={work.title}
-                subtitle={work.subtitle}
-                href={work.url}
-                period={`${getFormattedDate(work.startDate)} - ${
-                  work.endDate === ""
-                    ? "Present"
-                    : getFormattedDate(work.endDate)
-                }`}
-                description={work.description}
-              />
-            </BlurFade>
-          ))}
+          {workGroups.map((group, id) => {
+            const first = group[0];
+            const period = (w: (typeof workData)[number]) =>
+              `${getFormattedDate(w.startDate)} - ${w.endDate === "" ? "Present" : getFormattedDate(w.endDate)}`;
+
+            if (group.length === 1) {
+              return (
+                <BlurFade key={first.id} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
+                  <ResumeCard
+                    logoUrl={first.logoUrl}
+                    altText={first.title}
+                    title={first.title}
+                    subtitle={first.subtitle}
+                    href={first.url}
+                    period={period(first)}
+                    description={first.description}
+                  />
+                </BlurFade>
+              );
+            }
+
+            return (
+              <BlurFade key={first.title} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
+                <CompanyResumeCard
+                  logoUrl={first.logoUrl}
+                  company={first.title}
+                  href={first.url}
+                  location={first.location}
+                  roles={group.map((work) => ({
+                    id: work.id,
+                    roleTitle: work.subtitle,
+                    period: period(work),
+                    description: work.description,
+                  }))}
+                />
+              </BlurFade>
+            );
+          })}
         </div>
       </section>
       <section id="education">

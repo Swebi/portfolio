@@ -20,62 +20,101 @@ function verifySignature(body: string, signature: string): boolean {
   );
 }
 
-function isVideoUrl(name: string): boolean {
-  return /\.(mp4|webm|mov|avi)$/i.test(name);
-}
+// Maps each Files & media property → the URL property to write back + Cloudinary resource type
+const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "video" | "raw" | "auto" }> = {
+  "Media File":  { urlProp: "Media URL", resourceType: "auto" },
+  "Avatar File": { urlProp: "Avatar",    resourceType: "image" },
+  "Resume File": { urlProp: "Resume",    resourceType: "raw" },
+};
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
-  const signature = request.headers.get("x-notion-signature") ?? "";
+  const payload = JSON.parse(body);
 
+  // Handle Notion's verification challenge before signature check
+  if (payload.verification_token) {
+    console.log("[webhook] verification challenge received");
+    return NextResponse.json({ verification_token: payload.verification_token });
+  }
+
+  const signature = request.headers.get("x-notion-signature") ?? "";
   if (!verifySignature(body, signature)) {
+    console.warn("[webhook] invalid signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const payload = JSON.parse(body);
-
-  // Notion sends a verification challenge on webhook registration
-  if (payload.type === "url_verification") {
-    return NextResponse.json({ challenge: payload.challenge });
-  }
-
+  const eventType = payload.type ?? "unknown";
   const pageId = payload.entity?.id;
+  const updatedProperties: string[] = payload.data?.updated_properties ?? [];
+  console.log(`[webhook] event=${eventType} pageId=${pageId} updatedProps=${JSON.stringify(updatedProperties)}`);
+
   if (!pageId) return NextResponse.json({ ok: true });
 
+  console.log("[webhook] fetching page from Notion...");
   const page = await notion.pages.retrieve({ page_id: pageId }) as any;
   const properties = page.properties;
 
-  const mediaFiles = properties["Media File"]?.files;
-  if (!mediaFiles || mediaFiles.length === 0) {
-    // No media file — still revalidate in case text content changed
-    revalidatePath("/");
-    return NextResponse.json({ ok: true });
+  // Notion sends property IDs in updated_properties, not names — build a reverse map
+  const propIdToName: Record<string, string> = {};
+  for (const [name, prop] of Object.entries(properties)) {
+    propIdToName[(prop as any).id] = name;
   }
 
-  const file = mediaFiles[0];
-  const fileUrl = file.type === "file" ? file.file.url : file.external?.url;
-  const fileName = file.name ?? "";
+  const fileProps = Object.keys(FILE_PROPS);
+  const hasFileChange =
+    updatedProperties.length === 0 ||
+    updatedProperties.some((id) => fileProps.includes(propIdToName[id]));
 
-  if (!fileUrl) {
+  if (!hasFileChange) {
+    console.log("[webhook] no file property changed, skipping upload");
     revalidatePath("/");
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, uploaded: false });
   }
 
-  const result = await cloudinary.uploader.upload(fileUrl, {
-    resource_type: isVideoUrl(fileName) ? "video" : "image",
-    folder: "portfolio",
-    // Keep original filename as public_id for easy identification
-    use_filename: true,
-    unique_filename: true,
-  });
+  let uploaded = false;
 
-  await notion.pages.update({
-    page_id: pageId,
-    properties: {
-      "Media URL": { url: result.secure_url },
-    },
-  });
+  for (const [fileProp, { urlProp, resourceType }] of Object.entries(FILE_PROPS)) {
+    const files = properties[fileProp]?.files;
+    if (!files || files.length === 0) continue;
+
+    const file = files[0];
+    const fileUrl = file.type === "file" ? file.file.url : file.external?.url;
+    const fileName = file.name ?? "unknown";
+
+    if (!fileUrl) {
+      console.warn(`[webhook] ${fileProp}: file found but no URL extractable`);
+      continue;
+    }
+
+    console.log(`[webhook] ${fileProp}: uploading "${fileName}" to Cloudinary (resource_type=${resourceType})...`);
+
+    const result = await cloudinary.uploader.upload(fileUrl, {
+      resource_type: resourceType,
+      folder: "portfolio",
+      use_filename: true,
+      unique_filename: true,
+    });
+
+    console.log(`[webhook] ${fileProp}: uploaded → ${result.secure_url}`);
+
+    await notion.pages.update({
+      page_id: pageId,
+      properties: {
+        [urlProp]: { url: result.secure_url },
+        [fileProp]: { files: [] },  // clear file property to prevent re-processing on subsequent events
+      },
+    });
+
+    console.log(`[webhook] ${fileProp}: wrote Cloudinary URL to "${urlProp}" and cleared file property`);
+    uploaded = true;
+  }
+
+  if (!uploaded) {
+    console.log("[webhook] no file properties found — revalidating only");
+  }
 
   revalidatePath("/");
-  return NextResponse.json({ ok: true });
+  console.log("[webhook] revalidated /");
+
+  return NextResponse.json({ ok: true, uploaded });
 }

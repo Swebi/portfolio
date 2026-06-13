@@ -219,6 +219,7 @@ export default async function Page() {
               <BlurFade
                 key={project.title}
                 delay={BLUR_FADE_DELAY * 12 + id * 0.05}
+                className="relative z-[2]"
               >
                 <ProjectCard
                   href={project.url ? project.url : project.source}

@@ -72,7 +72,7 @@ export function CompanyResumeCard({
         {/* Role items.
             -ml-10 + pl-10 shifts the border-l left to avatar center (24px from card)
             while keeping the text content aligned with the company name (64px). */}
-        <div className="-ml-10 border-l border-border pl-10 space-y-3 pb-3">
+        <div className="-ml-10 border-l border-border pl-10 space-y-3 pb-3 pt-[5px]">
           {roles.map((role) => (
             <RoleItem key={role.id} role={role} />
           ))}

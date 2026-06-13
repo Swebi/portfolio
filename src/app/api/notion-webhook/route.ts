@@ -22,7 +22,8 @@ function verifySignature(body: string, signature: string): boolean {
 
 // Maps each Files & media property → the URL property to write back + Cloudinary resource type
 const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "video" | "raw" | "auto" }> = {
-  "Media File":  { urlProp: "Media URL", resourceType: "auto" },
+  "Media File":  { urlProp: "Media URL", resourceType: "auto" },  // project images/videos
+  "Logo File":   { urlProp: "Logo",      resourceType: "image" }, // company/school logos
   "Avatar File": { urlProp: "Avatar",    resourceType: "image" },
   "Resume File": { urlProp: "Resume",    resourceType: "raw" },
 };

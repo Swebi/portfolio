@@ -21,7 +21,7 @@ export const getPersonal = cache(async () => {
       location: properties.Location?.rich_text[0]?.plain_text || "",
       initials: properties.Initials?.rich_text[0]?.plain_text || "",
       avatar: properties.Avatar?.url || "",
-      resume: (properties.Resume?.url || "").replace("/raw/upload/", "/raw/upload/fl_attachment:false/"),
+      resume: properties.Resume?.url || "",
       email: properties.Email?.email || "",
       phone: properties["Phone Number"]?.phone_number || "",
       url: properties.URL?.url || "",

@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
       folder: "portfolio",
       use_filename: true,
       unique_filename: true,
+      access_mode: "public",
     });
 
     console.log(`[webhook] ${fileProp}: uploaded → ${result.secure_url}`);

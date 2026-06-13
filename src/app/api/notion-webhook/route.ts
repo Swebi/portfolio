@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   // Handle Notion's verification challenge before signature check
   if (payload.verification_token) {
-    console.log("[webhook] verification challenge received");
+    console.log("[webhook] verification_token:", payload.verification_token);
     return NextResponse.json({ verification_token: payload.verification_token });
   }
 

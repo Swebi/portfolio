@@ -4,6 +4,7 @@ import { ClickEffect } from "@/components/ui/click-effect";
 import { CustomCursor } from "@/components/ui/custom-cursor";
 import { Grain } from "@/components/ui/grain";
 import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { SectionLabel } from "@/components/ui/section-label";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
@@ -74,6 +75,7 @@ export default function RootLayout({
             <ScrollProgress />
             <ClickEffect />
             <Grain />
+            <SectionLabel />
             {children}
             <Navbar />
           </TooltipProvider>

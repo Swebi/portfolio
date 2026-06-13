@@ -54,6 +54,8 @@ export default async function Navbar() {
                     buttonVariants({ variant: "ghost", size: "icon" }),
                     "size-12"
                   )}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 >
                   <item.icon className="size-4" />
                 </Link>

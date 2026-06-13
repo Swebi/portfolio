@@ -99,44 +99,30 @@ export default async function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 5}>
             <h2 className="text-xl font-bold">Work Experience</h2>
           </BlurFade>
-          {workGroups.map((group, id) => {
-            const first = group[0];
-            const period = (w: (typeof workData)[number]) =>
-              `${getFormattedDate(w.startDate)} - ${w.endDate === "" ? "Present" : getFormattedDate(w.endDate)}`;
+          <ul className="mb-4 ml-4 divide-y divide-dashed border-l">
+            {workGroups.map((group, id) => {
+              const first = group[0];
+              const period = (w: (typeof workData)[number]) =>
+                `${getFormattedDate(w.startDate)} - ${w.endDate === "" ? "Present" : getFormattedDate(w.endDate)}`;
 
-            if (group.length === 1) {
               return (
                 <BlurFade key={first.id} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
-                  <ResumeCard
+                  <CompanyResumeCard
                     logoUrl={first.logoUrl}
-                    altText={first.title}
-                    title={first.title}
-                    subtitle={first.subtitle}
+                    company={first.title}
                     href={first.url}
-                    period={period(first)}
-                    description={first.description}
+                    location={first.location}
+                    roles={group.map((work) => ({
+                      id: work.id,
+                      roleTitle: work.subtitle,
+                      period: period(work),
+                      description: work.description,
+                    }))}
                   />
                 </BlurFade>
               );
-            }
-
-            return (
-              <BlurFade key={first.title} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
-                <CompanyResumeCard
-                  logoUrl={first.logoUrl}
-                  company={first.title}
-                  href={first.url}
-                  location={first.location}
-                  roles={group.map((work) => ({
-                    id: work.id,
-                    roleTitle: work.subtitle,
-                    period: period(work),
-                    description: work.description,
-                  }))}
-                />
-              </BlurFade>
-            );
-          })}
+            })}
+          </ul>
         </div>
       </section>
       <section id="education">

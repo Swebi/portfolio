@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { XIcon, Github, Globe } from "lucide-react";
@@ -45,6 +45,8 @@ export function ProjectCard({
   className,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <>
@@ -68,22 +70,21 @@ export function ProjectCard({
             className="pointer-events-none mx-auto h-40 w-full object-cover object-top"
           />
         </button>
-      ) : (
-        <Link
-          href={href || "#"}
-          className={cn("block cursor-pointer", className)}
+      ) : image ? (
+        <button
+          type="button"
+          className={cn("block cursor-pointer w-full outline-none focus:outline-none", className)}
+          onClick={() => setIsOpen(true)}
         >
-          {image && (
-            <Image
-              src={image}
-              alt={title}
-              width={500}
-              height={300}
-              className="h-40 w-full overflow-hidden object-cover object-top"
-            />
-          )}
-        </Link>
-      )}
+          <Image
+            src={image}
+            alt={title}
+            width={500}
+            height={300}
+            className="h-40 w-full overflow-hidden object-cover object-top"
+          />
+        </button>
+      ) : null}
 
       <CardHeader className="px-3">
         <div className="space-y-1">
@@ -134,7 +135,7 @@ export function ProjectCard({
       </CardFooter>
     </Card>
 
-    {video && createPortal(
+    {mounted && (video || image) && createPortal(
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -153,17 +154,26 @@ export function ProjectCard({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="absolute -top-12 right-0 rounded-full bg-neutral-900/50 p-2 text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black"
+                className="absolute -top-12 right-0 rounded-full bg-neutral-900/50 p-2 text-white backdrop-blur-md dark:bg-neutral-100/50 dark:text-black outline-none focus:outline-none focus-visible:outline-none"
                 onClick={() => setIsOpen(false)}
               >
                 <XIcon className="size-5" />
               </button>
               <div className="relative size-full overflow-hidden rounded-2xl">
-                <video
-                  src={video}
-                  autoPlay
-                  className="size-full rounded-2xl"
-                />
+                {video ? (
+                  <video
+                    src={video}
+                    autoPlay
+                    className="size-full rounded-2xl"
+                  />
+                ) : (
+                  <Image
+                    src={image!}
+                    alt={title}
+                    fill
+                    className="object-contain rounded-2xl"
+                  />
+                )}
               </div>
             </motion.div>
           </motion.div>

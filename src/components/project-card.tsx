@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { XIcon, Github, Globe } from "lucide-react";
+import { Github, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import Markdown from "react-markdown";
+import { Safari } from "@/components/ui/safari";
 
 interface Props {
   title: string;
@@ -46,6 +47,7 @@ export function ProjectCard({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [contentRatio, setContentRatio] = useState<number | undefined>(undefined);
   useEffect(() => setMounted(true), []);
 
   return (
@@ -68,6 +70,10 @@ export function ProjectCard({
             muted
             playsInline
             className="pointer-events-none mx-auto h-40 w-full object-cover object-top"
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              if (v.videoWidth && v.videoHeight) setContentRatio(v.videoWidth / v.videoHeight);
+            }}
           />
         </button>
       ) : image ? (
@@ -82,6 +88,10 @@ export function ProjectCard({
             width={500}
             height={300}
             className="h-40 w-full overflow-hidden object-cover object-top"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) setContentRatio(img.naturalWidth / img.naturalHeight);
+            }}
           />
         </button>
       ) : null}
@@ -143,38 +153,24 @@ export function ProjectCard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-md px-4 py-20"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
+              className="relative w-full"
+              style={{ maxWidth: "min(56rem, calc((100vh - 10rem) * 1.597))" }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                className="absolute -top-12 right-0 rounded-full bg-neutral-900/50 p-2 text-white backdrop-blur-md dark:bg-neutral-100/50 dark:text-black outline-none focus:outline-none focus-visible:outline-none"
-                onClick={() => setIsOpen(false)}
-              >
-                <XIcon className="size-5" />
-              </button>
-              <div className="relative size-full overflow-hidden rounded-2xl">
-                {video ? (
-                  <video
-                    src={video}
-                    autoPlay
-                    className="size-full rounded-2xl"
-                  />
-                ) : (
-                  <Image
-                    src={image!}
-                    alt={title}
-                    fill
-                    className="object-contain rounded-2xl"
-                  />
-                )}
-              </div>
+<Safari
+                url={url || href || ""}
+                videoSrc={video}
+                imageSrc={!video ? image : undefined}
+                contentAspectRatio={contentRatio}
+                className="w-full"
+              />
             </motion.div>
           </motion.div>
         )}

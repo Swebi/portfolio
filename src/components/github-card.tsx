@@ -8,12 +8,12 @@ const GithubCard = ({ username }: { username: string }) => {
   const colorScheme = theme === "light" || theme === "dark" ? theme : undefined;
 
   return (
-    <div className="flex justify-center items-center relative max-w-[600px] w-[90vw]  min-h-[220px] bg-card dark:bg-card hover:bg-gray-50 p-5 border rounded-xl [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] ">
+    <div className="flex justify-center items-center relative max-w-[600px] w-[90vw]  min-h-[210px] bg-card dark:bg-card hover:bg-gray-50 px-5 py-1 border rounded-xl [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] ">
       <GitHubCalendar
         username={username}
         colorScheme={colorScheme}
         hideColorLegend={true}
-        hideTotalCount={true}
+        hideTotalCount={false}
       />
     </div>
   );

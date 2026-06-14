@@ -165,22 +165,12 @@ export default async function Page() {
               </BlurFade>
             ))}
           </div>
+          <BlurFade delay={BLUR_FADE_DELAY * 10 + personal.skills.length * 0.05}>
+            <div className="flex gap-2 flex-wrap max-w-xl mt-2">
+              <GithubCard username={personal.githubid} />
+            </div>
+          </BlurFade>
         </div>
-      </section>
-      <section id="about">
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold">About</h2>
-        </BlurFade>
-        {/* <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-            {DATA.summary}
-          </Markdown>
-        </BlurFade> */}
-        <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <div className="flex gap-2 flex-wrap max-w-xl mt-2">
-            <GithubCard username={personal.githubid} />
-          </div>
-        </BlurFade>
       </section>
       <section id="projects">
         <div className="space-y-12 w-full py-12">
@@ -233,17 +223,11 @@ export default async function Page() {
                   Volunteering
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Communities I am currently involved in or have been in the
-                  past.
+                  Communities and Organizations
                 </h2>
-                {/* <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  During my time in university, I attended{" "}
-                  {DATA.hackathons.length}+ hackathons. People from around the
-                  country would come together and build incredible things in 2-3
-                  days. It was eye-opening to see the endless possibilities
-                  brought to life by a group of motivated and passionate
-                  individuals.
-                </p> */}
+                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Groups where I&apos;ve contributed, collaborated, and grown as a developer.
+                </p>
               </div>
             </div>
           </BlurFade>
@@ -268,7 +252,7 @@ export default async function Page() {
         </div>
       </section>
       <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
+        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pt-4 pb-10">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-3">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">

@@ -1,9 +1,9 @@
+export const revalidate = 3600;
+
 import { getBlogPosts, getPost } from "@/data/blog";
 import { DATA } from "@/data/resume";
-import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
@@ -18,6 +18,7 @@ export async function generateMetadata({
   };
 }): Promise<Metadata | undefined> {
   let post = await getPost(params.slug);
+  if (!post) return undefined;
 
   let {
     title,
@@ -25,7 +26,7 @@ export async function generateMetadata({
     summary: description,
     image,
   } = post.metadata;
-  let ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/og?title=${title}`;
+  let ogImage = image || `${DATA.url}/og?title=${title}`;
 
   return {
     title,
@@ -77,9 +78,7 @@ export default async function Blog({
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${DATA.url}${post.metadata.image}`
-              : `${DATA.url}/og?title=${post.metadata.title}`,
+            image: post.metadata.image || `${DATA.url}/og?title=${post.metadata.title}`,
             url: `${DATA.url}/blog/${post.slug}`,
             author: {
               "@type": "Person",
@@ -88,15 +87,17 @@ export default async function Blog({
           }),
         }}
       />
-      <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
+      <h1 className="title font-bold text-4xl tracking-tight max-w-[650px]">
         {post.metadata.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm max-w-[650px]">
-        <Suspense fallback={<p className="h-5" />}>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {formatDate(post.metadata.publishedAt)}
-          </p>
-        </Suspense>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          {new Date(post.metadata.publishedAt).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
       </div>
       <article
         className="prose dark:prose-invert"

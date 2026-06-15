@@ -26,6 +26,7 @@ const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "vid
   "Logo File":   { urlProp: "Logo",      resourceType: "image" }, // company/school logos
   "Avatar File": { urlProp: "Avatar",    resourceType: "image" },
   "Resume File": { urlProp: "Resume",    resourceType: "raw" },
+  "Cover File":  { urlProp: "Cover",     resourceType: "image" }, // blog cover images
 };
 
 export async function POST(request: NextRequest) {
@@ -116,7 +117,9 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath("/");
-  console.log("[webhook] revalidated /");
+  revalidatePath("/blog");
+  revalidatePath("/blog/[slug]", "page");
+  console.log("[webhook] revalidated / and /blog");
 
   return NextResponse.json({ ok: true, uploaded });
 }

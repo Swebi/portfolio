@@ -1,7 +1,7 @@
 import GithubCard from "@/components/github-card";
 import { HackathonCard } from "@/components/hackathon-card";
-import MapComponent from "@/components/location-card";
-import LocationCard from "@/components/location-card";
+import MapCard from "@/components/map-card";
+import ClockCard from "@/components/clock-card";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { CompanyResumeCard } from "@/components/company-resume-card";
@@ -173,13 +173,12 @@ export default async function Page() {
               </BlurFade>
             ))}
           </div>
-          <BlurFade delay={BLUR_FADE_DELAY * 10 + personal.skills.length * 0.05}>
-            <div className="flex gap-2 flex-wrap max-w-xl mt-2">
-              <GithubCard username={personal.githubid} />
-            </div>
-          </BlurFade>
+        </div>
+      </section>
+      <section id="writing">
+        <div className="flex min-h-0 flex-col gap-y-3">
           <BlurFade delay={BLUR_FADE_DELAY * 11}>
-            <h2 className="text-xl font-bold mt-4">Recent Writing</h2>
+            <h2 className="text-xl font-bold">Recent Writing</h2>
           </BlurFade>
           <div className="flex flex-col gap-4">
             {blogPosts.map((post, id) => (
@@ -209,6 +208,22 @@ export default async function Page() {
               </Link>
             </BlurFade>
           </div>
+        </div>
+      </section>
+      <section id="about">
+        <div className="flex min-h-0 flex-col gap-y-3">
+          <BlurFade delay={BLUR_FADE_DELAY * 13}>
+            <h2 className="text-xl font-bold">About</h2>
+          </BlurFade>
+          <BlurFade delay={BLUR_FADE_DELAY * 14}>
+            <div className="flex flex-col gap-2 max-w-[600px] w-[90vw]">
+              <div className="grid grid-cols-2 gap-2">
+                <MapCard imageUrl={personal.mapImage} location={personal.location} />
+                <ClockCard timezone={personal.timezone} />
+              </div>
+              <GithubCard username={personal.githubid} />
+            </div>
+          </BlurFade>
         </div>
       </section>
       <section id="projects">

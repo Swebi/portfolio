@@ -38,6 +38,12 @@ export const getPersonal = cache(async () => {
       youtube: properties.YouTube?.url || "",
       skills:
         properties.Skills?.multi_select.map((skill: any) => skill.name) || [],
+      timezone: properties.Timezone?.rich_text[0]?.plain_text || "UTC",
+      mapImage:
+        properties["Map File"]?.files?.[0]?.file?.url ||
+        properties["Map File"]?.files?.[0]?.external?.url ||
+        properties["Map Image"]?.url ||
+        "",
     };
   });
 

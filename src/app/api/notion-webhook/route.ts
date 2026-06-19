@@ -27,6 +27,7 @@ const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "vid
   "Avatar File": { urlProp: "Avatar",    resourceType: "image" },
   "Resume File": { urlProp: "Resume",    resourceType: "raw" },
   "Cover File":  { urlProp: "Cover",     resourceType: "image" }, // blog cover images
+  "Map File":    { urlProp: "Map Image", resourceType: "image" },
 };
 
 export async function POST(request: NextRequest) {

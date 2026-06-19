@@ -4,6 +4,71 @@ import { cache } from "react";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { NotionToMarkdown } from "notion-to-md";
 import { markdownToHTML } from "@/lib/markdown";
+import { v2 as cloudinary } from "cloudinary";
+import crypto from "crypto";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Module-level cache: survives ISR re-renders within the same process.
+// On cold start (new deployment), Cloudinary's resource() check prevents re-uploads.
+const imgUrlCache = new Map<string, string>();
+
+function notionImgPublicId(url: string): string {
+  const pathname = new URL(url).pathname;
+  const hash = crypto.createHash("sha256").update(pathname).digest("hex").slice(0, 24);
+  return `portfolio/blog/${hash}`;
+}
+
+async function toCdnUrl(notionUrl: string): Promise<string> {
+  const publicId = notionImgPublicId(notionUrl);
+  if (imgUrlCache.has(publicId)) return imgUrlCache.get(publicId)!;
+
+  try {
+    const existing = await cloudinary.api.resource(publicId);
+    imgUrlCache.set(publicId, existing.secure_url);
+    return existing.secure_url;
+  } catch {
+    const uploaded = await cloudinary.uploader.upload(notionUrl, {
+      public_id: publicId,
+      overwrite: false,
+      resource_type: "image",
+    });
+    imgUrlCache.set(publicId, uploaded.secure_url);
+    return uploaded.secure_url;
+  }
+}
+
+async function rewriteNotionImages(html: string): Promise<string> {
+  const notionSrcs = new Set<string>();
+  const srcPattern = /(<img[^>]+\ssrc=")([^"]+)(")/g;
+  let m;
+  while ((m = srcPattern.exec(html)) !== null) {
+    const url = m[2];
+    if (url.includes("X-Amz-Signature") || url.includes("amazonaws.com")) {
+      notionSrcs.add(url);
+    }
+  }
+  if (notionSrcs.size === 0) return html;
+
+  const urlMap = new Map<string, string>();
+  await Promise.all(
+    [...notionSrcs].map(async (src) => {
+      try {
+        urlMap.set(src, await toCdnUrl(src));
+      } catch (e) {
+        console.error("[notion] failed to proxy image to Cloudinary:", e);
+      }
+    })
+  );
+
+  return html.replace(/(<img[^>]+\ssrc=")([^"]+)(")/g, (_, pre, src, post) =>
+    urlMap.has(src) ? pre + urlMap.get(src)! + post : pre + src + post
+  );
+}
 
 export const notion = new Client({
   auth: process.env.NOTION_TOKEN,
@@ -104,9 +169,8 @@ async function resolveColumns(blocks: any[]): Promise<any[]> {
             .join("\n\n");
           const html = await markdownToHTML(colMarkdown);
           // Constrain images to the same max-height so columns appear balanced
-          return html.replace(
-            /<img /g,
-            '<img style="max-height:420px;width:auto;max-width:100%;display:block;margin:0 auto;" '
+          return html.replace(/<img ([^>]*)>/g, (_, attrs) =>
+            `<span class="img-skeleton"><img loading="lazy" decoding="async" onload="this.style.opacity='1';this.parentElement.classList.add('img-loaded')" style="opacity:0;transition:opacity 0.4s ease;max-height:420px;width:auto;max-width:100%;display:block;margin:0 auto;" ${attrs}></span>`
           );
         })
       );
@@ -141,12 +205,15 @@ export const getNotionPostMarkdown = cache(async (slug: string) => {
   const { parent: markdown } = n2m.toMarkdownString(resolved);
   const raw = await markdownToHTML(markdown);
 
-  // Cap standalone images (no existing inline style = not from columns) so
-  // portrait images don't stretch to full article width.
-  const html = raw.replace(
-    /<img (?![^>]*style=)/g,
-    '<img style="max-height:600px;width:auto;max-width:100%;display:block;margin:0 auto;" '
+  // Cap standalone images (no existing style = not already wrapped from columns)
+  // and wrap in a skeleton container to reserve space while loading.
+  const wrapped = raw.replace(/<img (?![^>]*style=)([^>]*)>/g, (_, attrs) =>
+    `<span class="img-skeleton"><img loading="lazy" decoding="async" onload="this.style.opacity='1';this.parentElement.classList.add('img-loaded')" style="opacity:0;transition:opacity 0.4s ease;max-height:600px;width:auto;max-width:100%;display:block;margin:0 auto;" ${attrs}></span>`
   );
+
+  // Rewrite expiring Notion S3 URLs to permanent Cloudinary URLs so browsers
+  // can cache images across navigations and ISR re-renders.
+  const html = await rewriteNotionImages(wrapped);
 
   return {
     html,

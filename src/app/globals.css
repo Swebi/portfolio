@@ -189,3 +189,41 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
   opacity: var(--grain-opacity, 0.03);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
+
+.img-skeleton {
+  display: block;
+  min-height: 300px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  background: hsl(var(--muted));
+  margin: 0 auto;
+}
+
+.img-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--muted-foreground) / 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: img-shimmer 1.5s ease-in-out infinite;
+}
+
+.img-skeleton.img-loaded {
+  min-height: 0;
+  background: none;
+}
+
+.img-skeleton.img-loaded::after {
+  display: none;
+}
+
+@keyframes img-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -13,7 +13,7 @@ const MapCard = ({ imageUrl, location }: MapCardProps) => {
 
   return (
     <div className="h-52 rounded-xl border bg-[hsl(0,0%,100%)] dark:bg-card flex flex-col items-center justify-center gap-2.5 p-3">
-      <div className="relative w-full flex-1 rounded-lg overflow-hidden bg-black/[0.12] dark:bg-white/[0.03]">
+      <div className="relative w-full flex-1 rounded-lg overflow-hidden bg-black/[0.12] dark:bg-white/[0.03] z-[2]">
         <Image
           src={src}
           alt={location}

@@ -11,6 +11,13 @@ const ClockCard = ({ timezone }: ClockCardProps) => {
   const secondRef = useRef<SVGLineElement>(null);
   const timeRef = useRef<HTMLSpanElement>(null);
 
+  const tzAbbr = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    timeZoneName: "short",
+  })
+    .formatToParts(new Date())
+    .find((p) => p.type === "timeZoneName")?.value ?? "";
+
   useEffect(() => {
     let raf: number;
 
@@ -110,9 +117,10 @@ const ClockCard = ({ timezone }: ClockCardProps) => {
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
-        <span ref={timeRef} className="text-xs font-medium text-muted-foreground tabular-nums opacity-50">
+        <span ref={timeRef} className="text-xs font-medium tabular-nums">
           --:-- --
         </span>
+        <span className="text-xs font-medium text-muted-foreground">• {tzAbbr}</span>
       </div>
     </div>
   );

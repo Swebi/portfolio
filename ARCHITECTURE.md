@@ -1,127 +1,246 @@
 # Portfolio Architecture
 
 ## Stack
-- **Next.js 14** (App Router) on Vercel
-- **Notion** as CMS (Personal DB + Portfolio DB)
-- **Cloudinary** as permanent media CDN
-- **MDX files** for blog posts
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router), deployed on Vercel |
+| CMS | Notion (3 databases) |
+| Media CDN | Cloudinary |
+| Styling | Tailwind CSS + shadcn/ui (Radix primitives) |
+| Animations | Framer Motion |
+| Syntax highlighting | rehype-pretty-code + Shiki (`min-light` / `min-dark`) |
+| Theme | next-themes, dark default |
 
 ---
 
-## Data Flow
+## Pages
 
-### Pages
+### `/` — Home / Resume
+- **Data:** `getPersonal()` + `getPortfolio()` + `getBlogPosts()` (4 most recent)
+- **Revalidate:** `REVALIDATE` env var (default 86400s / 24h)
+- **Sections:** Hero · Work · Education · Skills · About · Projects · Volunteering · Contact
 
-```
-Visitor request
-  → Vercel serves cached ISR page (fast)
-  → If stale or on-demand revalidated: Next.js re-runs page.tsx as a server
-    component, calling getPersonal() and getPortfolio() in notion.ts, which
-    hit the Notion API and return fresh data. Renders with permanent Cloudinary
-    URLs for media. Cached until next revalidation.
-```
+### `/blog` — Blog listing
+- **Data:** `getBlogPosts()` → metadata only, no block content
+- **Revalidate:** 3600s
 
-### Media Pipeline
+### `/blog/[slug]` — Blog post
+- **Data:** `getPost(slug)` → full block content rendered to HTML
+- **Revalidate:** 3600s
+- `generateStaticParams()` pre-renders all published posts at build time
 
-```
-User uploads file to Notion (Media File property)
-  → Notion sends POST to yoursite.com/api/notion-webhook
-  → /api/notion-webhook is a Next.js API route running as a Vercel serverless
-    function — same repo, same deployment. The file's signed URL is still fresh
-    since the upload just happened.
-  → Handler downloads file from Notion, uploads to Cloudinary
-  → Calls notion.pages.update({ properties: { "Media URL": { url: cloudinaryUrl } } })
-    — updates just that one field on the Notion page, everything else untouched
-  → Calls revalidatePath('/') from next/cache — because the handler is part of
-    the Next.js app, it can tell Vercel to discard the cached page so the next
-    visitor gets a freshly rendered one with the new Cloudinary URL
-```
+### `/opengraph-image` — OG image
+- `next/og` ImageResponse, rendered at request time by Vercel Edge
+- Grain texture via inline base64 SVG (no external fetch needed at render)
 
 ---
 
-## Revalidation Strategy
+## Notion Databases
 
-| Trigger | Mechanism | Latency |
-|---|---|---|
-| Content edited in Notion | Notion webhook → `revalidatePath` | ~5-10s |
-| Media uploaded to Notion | Same webhook, after Cloudinary upload | ~10-15s |
-| Fallback (webhook missed) | ISR `revalidate = 86400` (24hr) | up to 24hr |
+### Personal DB (`NOTION_PERSONAL`)
+Single-row table. Read by `getPersonal()`.
 
-No timed polling. Pages stay cached until something actually changes.
-
----
-
-## Notion DB Schema
-
-### Personal DB
 | Property | Type | Notes |
 |---|---|---|
-| Name | Title | |
-| Description | Text | |
-| Location | Text | |
-| Avatar | URL | Cloudinary URL (already set) |
+| Name, Description | Title / Text | |
+| Avatar | URL | Cloudinary URL (set via webhook) |
+| Resume | URL | Cloudinary URL (PDF, set via webhook) |
+| GitHub, LinkedIn, Instagram, Twitter, YouTube | URL | Social links |
+| githubid | Text | Username for GitHub calendar |
 | Skills | Multi-select | |
-| Email | Email | |
-| GitHub, LinkedIn, etc. | URL | |
+| Timezone | Text | IANA tz string, e.g. `Europe/London` |
+| Map Image | URL | Cloudinary URL (set via webhook) |
+| Map File | Files & media | User uploads here; webhook processes and clears |
+| Avatar File | Files & media | Same pattern |
+| Resume File | Files & media | Same pattern |
 
-_No changes needed — avatar already on Cloudinary._
+### Portfolio DB (`NOTION_PORTFOLIO`)
+One row per work / education / project / volunteering entry.
 
-### Portfolio DB
+| Property | Type | Notes |
+|---|---|---|
+| Title | Title | Company, school, or project name |
+| Subtitle | Text | Role title or degree |
+| Description | Text | |
+| Category | Select | `Work` / `Education` / `Projects` / `Volunteering` |
+| Active | Checkbox | Filters displayed entries |
+| Start Date, End Date | Date | |
+| Logo | URL | Cloudinary URL |
+| Logo File | Files & media | Webhook uploads to Cloudinary → writes `Logo` |
+| Media URL | URL | Cloudinary URL for project image or video |
+| Media File | Files & media | Webhook uploads to Cloudinary → writes `Media URL` |
+| URL, Source | URL | Live site / GitHub |
+| Technologies | Multi-select | |
+| Location | Text | |
+
+### Blog DB (`NOTION_BLOG_DB`)
+One row per post. Page body holds the actual content as Notion blocks.
+
 | Property | Type | Notes |
 |---|---|---|
 | Title | Title | |
-| Subtitle, Description | Text | |
-| Category | Select | Work / Education / Projects / Volunteering |
-| Active | Checkbox | |
-| Start Date, End Date | Date | |
-| Logo | URL | External logo URL (paste manually, rarely changes) |
-| URL, Source | URL | |
-| Technologies | Multi-select | |
-| Location | Text | |
-| **Media File** | Files & media | **New** — user uploads image/video here |
-| **Media URL** | URL | **New** — webhook writes Cloudinary URL here, app reads this |
+| Slug | Text | URL path segment |
+| PublishedAt | Date | |
+| Summary | Text | Shown in listing and meta description |
+| Cover | URL | Cloudinary URL for OG image |
+| Cover File | Files & media | Webhook uploads to Cloudinary → writes `Cover` |
+| Status | Select | `Published` / `Draft` |
 
 ---
 
-## API Routes
+## Data Access Layer (`src/lib/notion.ts`)
 
-### `POST /api/notion-webhook`
-Triggered by Notion on any Portfolio DB page update.
+All functions are wrapped in React `cache()`, which deduplicates calls within a single RSC render tree (e.g. `getPersonal()` is called by both `page.tsx` and `Navbar` but only hits Notion once per render).
 
-1. Verify webhook signature
-2. Check if `Media File` property has a new file
-3. Download the file from Notion's signed S3 URL
-4. Upload to Cloudinary (image or video, auto-detected)
-5. PATCH Notion page: set `Media URL` = Cloudinary URL
-6. Call `revalidatePath('/')` to bust ISR cache
-7. Return 200
+### `getPersonal()`
+Single Notion DB query. Returns flat object used by the home page and Navbar.
 
-### No proxy route needed
-Cloudinary URLs are permanent — no signed URL expiry problem.
+### `getPortfolio()`
+Single Notion DB query. Returns array filtered/grouped at the page level into Work, Education, Projects, Volunteering.
+
+### `getNotionBlogPosts()`
+Single Notion DB query (published only, sorted by date descending). Returns metadata only — no block content is fetched here.
+
+### `getNotionPostMarkdown(slug)`
+Full blog post pipeline — the expensive path:
+
+```
+1. Notion DB query (find page by slug)
+2. n2m.pageToMarkdown(pageId)         ← N Notion API calls, one per block type
+3. resolveColumns(mdBlocks)            ← async: turns column_list blocks into flex HTML
+4. n2m.toMarkdownString(resolved)      ← serialise to Markdown string
+5. markdownToHTML(markdown)            ← remark-parse → remark-rehype → rehype-pretty-code → rehype-stringify
+6. img regex: wrap standalone <img> in <span class="img-skeleton"> (fade-in + skeleton)
+7. rewriteNotionImages(html)           ← replaces expiring Notion S3 URLs with Cloudinary URLs
+```
+
+**Column layout:** Notion `column_list` blocks are resolved in step 3. Each column's markdown is converted to HTML independently, images are wrapped with skeleton markup, and the columns are assembled into a `display:flex` div before being embedded in the final markdown. `remark-rehype` with `allowDangerousHtml: true` passes this raw HTML through untouched.
+
+**Image proxying (`rewriteNotionImages`):**
+Notion inline image URLs are time-limited signed S3 URLs (`X-Amz-Signature`, ~1h TTL). Every fresh Notion API call returns new tokens, so the URL changes each render — breaking browser caching and causing image reloads on back-navigation.
+
+Fix: at render time, each Notion image URL is rewritten to a permanent Cloudinary URL.
+
+```
+notionUrl → SHA-256 hash of URL pathname (24 hex chars) → public_id: portfolio/blog/<hash>
+                                    ↓
+         1. Check module-level imgUrlCache Map (process-lifetime, survives ISR re-renders)
+         2. On miss → cloudinary.api.resource(publicId)  ← fast check, no upload
+         3. If 404 → cloudinary.uploader.upload(notionUrl, { overwrite: false }) ← one-time upload
+         4. Cache result in imgUrlCache, return secure_url
+```
+
+Same image + same pathname = same `public_id` = same Cloudinary URL, forever. New deployments hit step 2 (fast API check, no re-upload). Browser caches `res.cloudinary.com` URLs normally.
 
 ---
 
-## `notion.ts` Changes
+## Media Pipeline (Webhook)
 
-- `getPortfolio()`: read `mediaUrl` from `properties["Media URL"]?.url`
-- Return `mediaUrl` instead of `imageUrl` for project cards
-- If `mediaUrl` ends in `.mp4` or `.webm`, treat as video — pass to `video` prop on `ProjectCard`
-- Otherwise treat as image — pass to `image` prop
+`POST /api/notion-webhook` is triggered by Notion on any database page update.
+
+```
+Notion page updated
+  → Notion POST /api/notion-webhook
+  → Verify HMAC-SHA256 signature (NOTION_WEBHOOK_SECRET)
+  → Fetch full page from Notion API
+  → Build property-ID → name map (Notion sends IDs not names in updated_properties)
+  → For each file property that has content:
+      download from Notion S3 → upload to Cloudinary → write permanent URL back to Notion → clear file property
+  → revalidatePath('/')
+     revalidatePath('/blog')
+     revalidatePath('/blog/[slug]', 'page')
+```
+
+File properties handled:
+
+| Notion property | Writes to | Cloudinary resource_type |
+|---|---|---|
+| `Media File` | `Media URL` | `auto` (image or video) |
+| `Logo File` | `Logo` | `image` |
+| `Avatar File` | `Avatar` | `image` |
+| `Resume File` | `Resume` | `raw` (PDF) |
+| `Cover File` | `Cover` | `image` |
+| `Map File` | `Map Image` | `image` |
+
+---
+
+## Revalidation
+
+| Trigger | Mechanism | Pages invalidated |
+|---|---|---|
+| Notion content edited | Webhook → `revalidatePath` | `/`, `/blog`, `/blog/[slug]` |
+| Notion media uploaded | Webhook (after Cloudinary upload) | same |
+| Fallback (webhook missed) | ISR `revalidate` | `/` = 86400s · `/blog*` = 3600s |
+
+---
+
+## Components
+
+### Server Components
+- **`Navbar`** — async server component; calls `getPersonal()` for resume URL and social links. Renders as a macOS-style dock.
+- **`MapCard`** — `next/image` with Cloudinary map URL from Personal DB.
+- All page components.
+
+### Client Components
+- **`ClockCard`** — SVG analog clock ticking via `requestAnimationFrame`. Timezone-aware using `Intl.DateTimeFormat`.
+- **`GithubCard`** — `react-github-calendar`. Theme-aware (reads `next-themes`). Fetches live from GitHub API client-side.
+- **`CompanyResumeCard`** — work history grouped by company. Each role is individually expandable via a Framer Motion accordion.
+- **`ProjectCard`** — card with click-to-open modal. Modal renders a `Safari` browser chrome mockup around the project image/video. Uses `createPortal` to render the modal at `document.body`.
+- **`SectionLabel`** — fixed vertical label on left edge (desktop only). Scroll listener tracks which `section[id]` is in view; animates label transitions.
+- **`CustomCursor`**, **`ClickEffect`**, **`ScrollProgress`** — UI polish; cursor replacement, click ripple, top scroll bar.
+- **`ModeToggle`** — light/dark switch.
+
+### Animation primitives
+- `BlurFade` / `BlurFadeText` — staggered entrance animation used on every section.
+- `TextScramble` — character-scramble reveal on hero heading.
+- `Magnetic` — magnetic hover pull on inline links.
+- `Dock` / `DockIcon` — macOS dock magnification.
+
+---
+
+## Image Loading Pattern (Blog)
+
+Blog images arrive as plain `<img>` tags from the Notion → Markdown → HTML pipeline. Since content is injected via `dangerouslySetInnerHTML`, React components like `next/image` can't be used here.
+
+Instead, each `<img>` is wrapped at render time:
+
+```html
+<span class="img-skeleton">
+  <img
+    loading="lazy"
+    decoding="async"
+    onload="this.style.opacity='1'; this.parentElement.classList.add('img-loaded')"
+    style="opacity:0; transition:opacity 0.4s ease; max-height:600px; ..."
+    src="https://res.cloudinary.com/..."
+  >
+</span>
+```
+
+`.img-skeleton` in `globals.css` shows a shimmer placeholder (`--muted` + `--muted-foreground` CSS variables, adapts to dark/light mode). On image load: `img-loaded` class removes the shimmer and `min-height`, image fades in. Prevents both progressive-render banding and layout shift.
+
+---
+
+## Unused / Legacy
+
+| File | Status |
+|---|---|
+| `content/hello-world.mdx` | Not wired up — Notion is the blog CMS |
+| `src/components/mdx.tsx` | Unused — leftover from MDX-based blog era |
+| `src/components/location-card.tsx` | Unused — Google Maps iframe, not referenced in any page |
 
 ---
 
 ## Environment Variables
 
 ```bash
-# existing
-NOTION_TOKEN=
-NOTION_PERSONAL=
-NOTION_PORTFOLIO=
-REVALIDATE=86400
-
-# new
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-NOTION_WEBHOOK_SECRET=    # for verifying webhook signatures
+NOTION_TOKEN              # Notion integration token
+NOTION_PERSONAL           # Notion DB ID — personal info
+NOTION_PORTFOLIO          # Notion DB ID — portfolio items
+NOTION_BLOG_DB            # Notion DB ID — blog posts
+NOTION_WEBHOOK_SECRET     # HMAC secret for webhook signature verification
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+REVALIDATE                # ISR interval for home page (default: 86400)
 ```

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Magnetic } from "@/components/ui/magnetic";
 import { TextScramble } from "@/components/ui/text-scramble";
 import { getPersonal, getPortfolio } from "@/lib/notion";
+import { getBlogPosts } from "@/data/blog";
 import { getFormattedDate } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +27,13 @@ export const revalidate = time;
 export default async function Page() {
   const personal = await getPersonal();
   const portfolio = await getPortfolio();
+  const blogPosts = (await getBlogPosts())
+    .sort((a, b) =>
+      new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
+        ? -1
+        : 1
+    )
+    .slice(0, 4);
 
   const workData = portfolio.filter(
     (data) => data.category === "Work" && data.active
@@ -170,6 +178,37 @@ export default async function Page() {
               <GithubCard username={personal.githubid} />
             </div>
           </BlurFade>
+          <BlurFade delay={BLUR_FADE_DELAY * 11}>
+            <h2 className="text-xl font-bold mt-4">Recent Writing</h2>
+          </BlurFade>
+          <div className="flex flex-col gap-4">
+            {blogPosts.map((post, id) => (
+              <BlurFade key={post.slug} delay={BLUR_FADE_DELAY * 12 + id * 0.05}>
+                <Link className="flex flex-col space-y-1" href={`/blog/${post.slug}`}>
+                  <div className="w-full flex flex-col gap-1">
+                    <p className="tracking-tight font-medium">{post.metadata.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(post.metadata.publishedAt).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                    {post.metadata.summary && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {post.metadata.summary}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              </BlurFade>
+            ))}
+            <BlurFade delay={BLUR_FADE_DELAY * 12 + blogPosts.length * 0.05}>
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                View all posts →
+              </Link>
+            </BlurFade>
+          </div>
         </div>
       </section>
       <section id="projects">
@@ -216,7 +255,7 @@ export default async function Page() {
       </section>
       <section id="volunteering">
         <div className="space-y-12 w-full py-12">
-          <BlurFade delay={BLUR_FADE_DELAY * 13}>
+          <BlurFade delay={BLUR_FADE_DELAY * 15}>
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
@@ -231,12 +270,12 @@ export default async function Page() {
               </div>
             </div>
           </BlurFade>
-          <BlurFade delay={BLUR_FADE_DELAY * 14}>
+          <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <ul className="mb-4 ml-4 divide-y divide-dashed border-l">
               {volunteeringData.map((volunteer, id) => (
                 <BlurFade
                   key={volunteer.id}
-                  delay={BLUR_FADE_DELAY * 15 + id * 0.05}
+                  delay={BLUR_FADE_DELAY * 17 + id * 0.05}
                 >
                   <HackathonCard
                     title={volunteer.title}
@@ -253,7 +292,7 @@ export default async function Page() {
       </section>
       <section id="contact">
         <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pt-4 pb-10">
-          <BlurFade delay={BLUR_FADE_DELAY * 16}>
+          <BlurFade delay={BLUR_FADE_DELAY * 18}>
             <div className="space-y-3">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
                 Contact

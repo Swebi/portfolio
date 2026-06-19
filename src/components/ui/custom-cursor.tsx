@@ -56,6 +56,12 @@ function sampleLuminance(e: MouseEvent): number {
     }
     node = node.parentElement;
   }
+
+  const bodyBg = getComputedStyle(document.body).backgroundColor;
+  const bm = bodyBg.match(/[\d.]+/g);
+  if (bm && bm.length >= 3) {
+    return (0.299 * +bm[0] + 0.587 * +bm[1] + 0.114 * +bm[2]) / 255;
+  }
   return 0;
 }
 

@@ -60,7 +60,7 @@ export function ProjectCard({
       {video ? (
         <button
           type="button"
-          className={cn("block cursor-pointer w-full outline-none focus:outline-none", className)}
+          className={cn("block cursor-pointer w-full outline-none focus:outline-none border-b", className)}
           onClick={() => setIsOpen(true)}
         >
           <video
@@ -79,7 +79,7 @@ export function ProjectCard({
       ) : image ? (
         <button
           type="button"
-          className={cn("block cursor-pointer w-full outline-none focus:outline-none", className)}
+          className={cn("block cursor-pointer w-full outline-none focus:outline-none border-b", className)}
           onClick={() => setIsOpen(true)}
         >
           <Image

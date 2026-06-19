@@ -35,7 +35,8 @@ function sampleLuminance(e: MouseEvent): number {
           const rect = img.getBoundingClientRect();
           const px = Math.round((e.clientX - rect.left) * (img.naturalWidth / rect.width));
           const py = Math.round((e.clientY - rect.top) * (img.naturalHeight / rect.height));
-          const [r, g, b] = ctx.getImageData(Math.max(0, px), Math.max(0, py), 1, 1).data;
+          const data = ctx.getImageData(Math.max(0, px), Math.max(0, py), 1, 1).data;
+          const [r, g, b] = [data[0], data[1], data[2]];
           return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         }
       } catch {

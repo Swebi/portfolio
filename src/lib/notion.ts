@@ -56,7 +56,7 @@ async function rewriteNotionImages(html: string): Promise<string> {
 
   const urlMap = new Map<string, string>();
   await Promise.all(
-    [...notionSrcs].map(async (src) => {
+    Array.from(notionSrcs).map(async (src) => {
       try {
         urlMap.set(src, await toCdnUrl(src));
       } catch (e) {

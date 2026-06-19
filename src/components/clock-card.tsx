@@ -85,8 +85,8 @@ const ClockCard = ({ timezone }: ClockCardProps) => {
   });
 
   return (
-    <div className="h-52 rounded-xl border bg-card flex flex-col gap-2.5 p-3 [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]">
-      <div className="flex-1 rounded-lg bg-white/[0.03] flex items-center justify-center">
+    <div className="h-52 rounded-xl border bg-[hsl(0,0%,100%)] dark:bg-card flex flex-col gap-2.5 p-3">
+      <div className="flex-1 rounded-lg bg-black/[0.045] dark:bg-white/[0.03] flex items-center justify-center">
         <svg width="110" height="110" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.2" />
           {marks.map((mk, i) => (

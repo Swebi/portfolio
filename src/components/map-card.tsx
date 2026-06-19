@@ -12,8 +12,8 @@ const MapCard = ({ imageUrl, location }: MapCardProps) => {
     "https://preview.redd.it/silver-line-now-fully-live-on-apple-maps-and-the-transit-app-v0-h1778rzdvrwf1.png?width=640&crop=smart&auto=webp&s=b83347f8227c453e247ceb73220ffeec1335a45e";
 
   return (
-    <div className="h-52 rounded-xl border bg-card flex flex-col items-center justify-center gap-2.5 p-3 [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]">
-      <div className="relative w-full flex-1 rounded-lg overflow-hidden bg-white/[0.03]">
+    <div className="h-52 rounded-xl border bg-[hsl(0,0%,100%)] dark:bg-card flex flex-col items-center justify-center gap-2.5 p-3">
+      <div className="relative w-full flex-1 rounded-lg overflow-hidden bg-black/[0.12] dark:bg-white/[0.03]">
         <Image
           src={src}
           alt={location}

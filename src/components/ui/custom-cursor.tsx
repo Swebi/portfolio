@@ -3,10 +3,67 @@
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useState } from "react";
 
+const imgCanvasCache = new WeakMap<HTMLImageElement, HTMLCanvasElement>();
+
+function getOrCreateCanvas(img: HTMLImageElement): HTMLCanvasElement | null {
+  if (imgCanvasCache.has(img)) return imgCanvasCache.get(img)!;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(img, 0, 0);
+    imgCanvasCache.set(img, canvas);
+    return canvas;
+  } catch {
+    return null;
+  }
+}
+
+function sampleLuminance(e: MouseEvent): number {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (!el) return 0;
+
+  const img = (el.tagName === "IMG" ? el : el.closest("img")) as HTMLImageElement | null;
+  if (img && img.complete && img.naturalWidth > 0) {
+    const canvas = getOrCreateCanvas(img);
+    if (canvas) {
+      try {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          const rect = img.getBoundingClientRect();
+          const px = Math.round((e.clientX - rect.left) * (img.naturalWidth / rect.width));
+          const py = Math.round((e.clientY - rect.top) * (img.naturalHeight / rect.height));
+          const [r, g, b] = ctx.getImageData(Math.max(0, px), Math.max(0, py), 1, 1).data;
+          return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+      } catch {
+        imgCanvasCache.delete(img);
+      }
+    }
+  }
+
+  let node: Element | null = el;
+  while (node && node !== document.documentElement) {
+    const bg = getComputedStyle(node).backgroundColor;
+    const m = bg.match(/[\d.]+/g);
+    if (m && m.length >= 3) {
+      const a = m[3] !== undefined ? parseFloat(m[3]) : 1;
+      if (a > 0.05) {
+        return (0.299 * +m[0] + 0.587 * +m[1] + 0.114 * +m[2]) / 255;
+      }
+    }
+    node = node.parentElement;
+  }
+  return 0;
+}
+
 export function CustomCursor() {
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [clicking, setClicking] = useState(false);
+  const [light, setLight] = useState(false);
 
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
@@ -21,6 +78,7 @@ export function CustomCursor() {
       x.set(e.clientX);
       y.set(e.clientY);
       setVisible(true);
+      setLight(sampleLuminance(e) > 0.5);
     };
 
     const onOver = (e: MouseEvent) => {
@@ -67,16 +125,18 @@ export function CustomCursor() {
     };
   }, [x, y]);
 
+  const color = light ? "black" : "white";
+
   return (
     <>
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[99999]"
+        className="fixed top-0 left-0 w-2 h-2 rounded-full pointer-events-none z-[99999]"
         style={{
           x: dotX,
           y: dotY,
           translateX: "-50%",
           translateY: "-50%",
-          mixBlendMode: "difference",
+          backgroundColor: color,
         }}
         animate={{
           opacity: visible ? 1 : 0,
@@ -85,13 +145,15 @@ export function CustomCursor() {
         transition={{ duration: 0.1 }}
       />
       <motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99998] border border-white"
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99998]"
         style={{
           x: ringX,
           y: ringY,
           translateX: "-50%",
           translateY: "-50%",
-          mixBlendMode: "difference",
+          borderColor: color,
+          borderWidth: 1,
+          borderStyle: "solid",
         }}
         animate={{
           width: clicking ? 20 : hovering ? 48 : 32,

@@ -32,10 +32,17 @@ async function toCdnUrl(notionUrl: string): Promise<string> {
     imgUrlCache.set(publicId, existing.secure_url);
     return existing.secure_url;
   } catch {
-    const uploaded = await cloudinary.uploader.upload(notionUrl, {
-      public_id: publicId,
-      overwrite: false,
-      resource_type: "image",
+    // rehype-stringify HTML-encodes & as &amp; in attribute values, making the
+    // S3 pre-signed URL invalid. Decode before fetching.
+    const fetchUrl = notionUrl.replace(/&amp;/g, "&");
+    const response = await fetch(fetchUrl);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const uploaded = await new Promise<any>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { public_id: publicId, overwrite: false, resource_type: "image" },
+        (err, res) => (err ? reject(err) : resolve(res))
+      );
+      stream.end(buffer);
     });
     imgUrlCache.set(publicId, uploaded.secure_url);
     return uploaded.secure_url;

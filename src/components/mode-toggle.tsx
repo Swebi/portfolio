@@ -22,8 +22,7 @@ export function ModeToggle() {
       Math.max(y, window.innerHeight - y)
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transition = (document as any).startViewTransition(() => {
+    const transition = (document as unknown as { startViewTransition: (cb: () => void) => { ready: Promise<void> } }).startViewTransition(() => {
       setTheme(nextTheme);
     });
 

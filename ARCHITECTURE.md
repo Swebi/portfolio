@@ -11,6 +11,7 @@
 | Animations | Framer Motion |
 | Syntax highlighting | rehype-pretty-code + Shiki (`min-light` / `min-dark`) |
 | Theme | next-themes, dark default |
+| Page view counter | Upstash Redis (connected via Vercel marketplace) |
 
 ---
 
@@ -165,6 +166,20 @@ File properties handled:
 
 ---
 
+## Page Views
+
+`FooterStats` (client component) POSTs to `/api/views` on every page mount. The route calls `INCR portfolio:views` on Upstash Redis and returns the new count, which is displayed in the footer as `· X views`.
+
+```
+Client mount → POST /api/views → INCR portfolio:views (Upstash Redis) → { views: N } → footer
+```
+
+- Upstash Redis is connected through the Vercel marketplace (Storage → Upstash). Env vars are named `KV_REST_API_*` by that integration.
+- If the env vars are absent (local dev without Redis), the stat is silently hidden.
+- Uses the Upstash REST API directly (`fetch`) — no SDK dependency.
+
+---
+
 ## Revalidation
 
 | Trigger | Mechanism | Pages invalidated |
@@ -184,6 +199,7 @@ File properties handled:
 
 ### Client Components
 - **`ClockCard`** — SVG analog clock ticking via `requestAnimationFrame`. Timezone-aware using `Intl.DateTimeFormat`.
+- **`FooterStats`** — displays build freshness, page load time (FCP or `domContentLoadedEventEnd`), and total page views fetched from `/api/views`.
 - **`GithubCard`** — `react-github-calendar`. Theme-aware (reads `next-themes`). Fetches live from GitHub API client-side.
 - **`CompanyResumeCard`** — work history grouped by company. Each role is individually expandable via a Framer Motion accordion.
 - **`ProjectCard`** — card with click-to-open modal. Modal renders a `Safari` browser chrome mockup around the project image/video. Uses `createPortal` to render the modal at `document.body`.
@@ -243,4 +259,6 @@ CLOUDINARY_CLOUD_NAME
 CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 REVALIDATE                # ISR interval for home page (default: 86400)
+KV_REST_API_URL           # Upstash Redis REST URL (via Vercel → Storage → Upstash)
+KV_REST_API_TOKEN         # Upstash Redis auth token
 ```

@@ -96,7 +96,7 @@ export function ProjectCard({
         </button>
       ) : null}
 
-      <CardHeader className="px-3">
+      <CardHeader className="px-3.5">
         <div className="space-y-1">
           <CardTitle className="mt-1 text-base">{title}</CardTitle>
           <time className="font-sans text-xs">{dates}</time>
@@ -108,7 +108,7 @@ export function ProjectCard({
           </Markdown>
         </div>
       </CardHeader>
-      <CardContent className="mt-auto flex flex-col px-3">
+      <CardContent className="mt-auto flex flex-col px-3.5">
         {tags && tags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {tags?.map((tag) => (
@@ -123,7 +123,7 @@ export function ProjectCard({
           </div>
         )}
       </CardContent>
-      <CardFooter className="px-3 pb-3">
+      <CardFooter className="px-3.5 pb-3">
         <div className="flex flex-row flex-wrap items-start gap-1">
           {url && (
             <Link href={url} key={url} target="_blank">

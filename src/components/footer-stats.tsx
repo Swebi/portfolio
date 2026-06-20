@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export function FooterStats({ buildTime }: { buildTime: number }) {
   const [loadTime, setLoadTime] = useState<number | null>(null);
+  const [views, setViews] = useState<number | null>(null);
 
   useEffect(() => {
     const measure = () => {
@@ -25,6 +26,13 @@ export function FooterStats({ buildTime }: { buildTime: number }) {
     }
   }, []);
 
+  useEffect(() => {
+    fetch('/api/views', { method: 'POST' })
+      .then((r) => r.json())
+      .then(({ views }) => { if (views !== null) setViews(views); })
+      .catch(() => {});
+  }, []);
+
   const daysAgo = Math.floor((Date.now() - buildTime) / (1000 * 60 * 60 * 24));
   const lastUpdated =
     daysAgo === 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
@@ -33,6 +41,7 @@ export function FooterStats({ buildTime }: { buildTime: number }) {
     <footer className="text-xs text-muted-foreground text-center pt-8 ">
       Built with Next.js · Deployed on Vercel · Last updated {lastUpdated}
       {loadTime !== null && ` · Page loaded in ${loadTime}ms`}
+      {views !== null && ` · ${views.toLocaleString()} views`}
     </footer>
   );
 }

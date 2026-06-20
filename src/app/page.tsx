@@ -10,6 +10,7 @@ import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { SkillBadge } from "@/components/skill-badge";
 import { Magnetic } from "@/components/ui/magnetic";
 import { TextScramble } from "@/components/ui/text-scramble";
 import { getPersonal, getPortfolio } from "@/lib/notion";
@@ -180,7 +181,7 @@ export default async function Page() {
             <div className="flex flex-wrap gap-1">
               {personal.skills.map((skill: string, id: number) => (
                 <BlurFade key={skill} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-                  <Badge key={skill}>{skill}</Badge>
+                  <SkillBadge skill={skill} />
                 </BlurFade>
               ))}
             </div>

@@ -146,7 +146,7 @@ export const getNotionBlogPosts = cache(async () => {
         title: properties.Title?.title?.map((t: any) => t.plain_text).join("") || "Untitled",
         publishedAt: properties.PublishedAt?.date?.start || "",
         summary: properties.Summary?.rich_text?.map((t: any) => t.plain_text).join("") || "",
-        image: properties.Cover?.url || "",
+        image: properties.Cover?.rich_text?.[0]?.plain_text || properties.Cover?.url || "",
       },
     };
   });
@@ -231,7 +231,7 @@ export const getNotionPostMarkdown = cache(async (slug: string) => {
       title: properties.Title?.title?.map((t: any) => t.plain_text).join("") || "Untitled",
       publishedAt: properties.PublishedAt?.date?.start || "",
       summary: properties.Summary?.rich_text?.map((t: any) => t.plain_text).join("") || "",
-      image: properties.Cover?.url || "",
+      image: properties.Cover?.rich_text?.[0]?.plain_text || properties.Cover?.url || "",
     },
   };
 });

@@ -22,13 +22,14 @@ function verifySignature(body: string, signature: string): boolean {
 }
 
 // Maps each Files & media property → the URL property to write back + Cloudinary resource type
-const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "video" | "raw" | "auto" }> = {
-  "Media File":  { urlProp: "Media URL", resourceType: "auto" },  // project images/videos
-  "Logo File":   { urlProp: "Logo",      resourceType: "image" }, // company/school logos
-  "Avatar File": { urlProp: "Avatar",    resourceType: "image" },
-  "Resume File": { urlProp: "Resume",    resourceType: "raw" },
-  "Cover File":  { urlProp: "Cover",     resourceType: "image" }, // blog cover images
-  "Map File":    { urlProp: "Map Image", resourceType: "image" },
+// writeAs: "url" for Notion URL-type properties, "rich_text" for text-type properties
+const FILE_PROPS: Record<string, { urlProp: string; resourceType: "image" | "video" | "raw" | "auto"; writeAs: "url" | "rich_text" }> = {
+  "Media File":  { urlProp: "Media URL", resourceType: "auto",  writeAs: "url" },
+  "Logo File":   { urlProp: "Logo",      resourceType: "image", writeAs: "url" },
+  "Avatar File": { urlProp: "Avatar",    resourceType: "image", writeAs: "url" },
+  "Resume File": { urlProp: "Resume",    resourceType: "raw",   writeAs: "url" },
+  "Cover File":  { urlProp: "Cover",     resourceType: "image", writeAs: "rich_text" }, // Cover is rich_text in Blog DB
+  "Map File":    { urlProp: "Map Image", resourceType: "image", writeAs: "url" },
 };
 
 export async function POST(request: NextRequest) {
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
 
   let uploaded = false;
 
-  for (const [fileProp, { urlProp, resourceType }] of Object.entries(FILE_PROPS)) {
+  for (const [fileProp, { urlProp, resourceType, writeAs }] of Object.entries(FILE_PROPS)) {
     const files = properties[fileProp]?.files;
     if (!files || files.length === 0) continue;
 
@@ -127,8 +128,10 @@ export async function POST(request: NextRequest) {
     await notion.pages.update({
       page_id: pageId,
       properties: {
-        [urlProp]: { url: result.secure_url },
-        [fileProp]: { files: [] },  // clear file property to prevent re-processing on subsequent events
+        [urlProp]: writeAs === "rich_text"
+          ? { rich_text: [{ text: { content: result.secure_url } }] }
+          : { url: result.secure_url },
+        [fileProp]: { files: [] },
       },
     });
 

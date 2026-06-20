@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -177,6 +183,11 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
     height: 120px;
     opacity: 0;
   }
+}
+
+img {
+  position: relative;
+  z-index: 2;
 }
 
 .grain-overlay {

@@ -86,6 +86,7 @@ export const getPersonal = cache(async () => {
 
     return {
       id: page.id,
+      lastEditedAt: page.last_edited_time as string,
       name: properties.Name?.title[0]?.plain_text || "Untitled",
       description: properties.Description?.rich_text[0]?.plain_text || "",
       location: properties.Location?.rich_text[0]?.plain_text || "",
@@ -242,6 +243,7 @@ export const getPortfolio = cache(async () => {
 
     return {
       id: page.id,
+      lastEditedAt: page.last_edited_time as string,
       title: properties.Title?.title?.map((t: any) => t.plain_text).join("").trim() || "Untitled",
       subtitle: properties.Subtitle?.rich_text?.map((t: any) => t.plain_text).join("") || "",
       description: properties.Description?.rich_text?.map((t: any) => t.plain_text).join("") || "",

@@ -8,7 +8,7 @@ const SECTIONS = [
   { id: "hero", label: "Home" },
   { id: "work", label: "Work" },
   { id: "education", label: "Education" },
-  { id: "skills", label: "Skills" },
+  { id: "skills", label: "Skills & Writing" },
   { id: "about", label: "About" },
   { id: "projects", label: "Projects" },
   { id: "volunteering", label: "Volunteering" },
@@ -31,6 +31,13 @@ export function SectionLabel() {
     if (pageLabel) return;
 
     const onScroll = () => {
+      if (
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 50
+      ) {
+        setActive(SECTIONS[SECTIONS.length - 1].id);
+        return;
+      }
       const trigger = window.scrollY + window.innerHeight * 0.35;
       let current = SECTIONS[0].id;
       for (const { id } of SECTIONS) {

@@ -21,7 +21,7 @@ let lineId = 0;
 const nextId = () => ++lineId;
 
 export function InteractiveTerminal({
-  name = "Suhayb Ahmed",
+  name = "Suhayb",
   github,
   linkedin,
   resume,

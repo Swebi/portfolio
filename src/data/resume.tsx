@@ -1,5 +1,5 @@
 export const DATA = {
-  name: "Suhayb Ahmed",
+  name: "Suhayb",
   initials: "SA",
   url: "https://suhayb.space",
   description:

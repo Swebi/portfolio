@@ -32,17 +32,9 @@ async function toCdnUrl(notionUrl: string): Promise<string> {
     imgUrlCache.set(publicId, existing.secure_url);
     return existing.secure_url;
   } catch {
-    const fetchUrl = notionUrl.replace(/&amp;/g, "&");
-    const response = await fetch(fetchUrl);
-    if (!response.ok) {
-      const body = await response.text();
-      throw new Error(`S3 fetch failed ${response.status}: ${body.slice(0, 200)}`);
-    }
-    const ct = response.headers.get("content-type") ?? "unknown";
-    if (!ct.startsWith("image/")) {
-      const body = await response.text();
-      throw new Error(`S3 returned ${ct}: ${body.slice(0, 200)}`);
-    }
+    // Fetch directly — we have the raw Notion API URL with full auth query params
+    const response = await fetch(notionUrl);
+    if (!response.ok) throw new Error(`S3 fetch failed ${response.status}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     const uploaded = await new Promise<any>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
@@ -56,39 +48,28 @@ async function toCdnUrl(notionUrl: string): Promise<string> {
   }
 }
 
-async function rewriteNotionImages(html: string): Promise<string> {
-  const notionSrcs = new Set<string>();
-  const srcPattern = /(<img[^>]+\ssrc=")([^"]+)(")/g;
-  let m;
-  while ((m = srcPattern.exec(html)) !== null) {
-    const url = m[2];
-    if (url.includes("X-Amz-Signature") || url.includes("amazonaws.com")) {
-      notionSrcs.add(url);
-    }
-  }
-  if (notionSrcs.size === 0) return html;
-
-  const urlMap = new Map<string, string>();
-  await Promise.all(
-    Array.from(notionSrcs).map(async (src) => {
-      try {
-        urlMap.set(src, await toCdnUrl(src));
-      } catch (e) {
-        console.error("[notion] failed to proxy image to Cloudinary:", e);
-      }
-    })
-  );
-
-  return html.replace(/(<img[^>]+\ssrc=")([^"]+)(")/g, (_, pre, src, post) =>
-    urlMap.has(src) ? pre + urlMap.get(src)! + post : pre + src + post
-  );
-}
-
 export const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
 const n2m = new NotionToMarkdown({ notionClient: notion });
+
+// Upload inline blog images to Cloudinary at block-parse time so the raw
+// Notion S3 URL (with full auth query params) is used — not the HTML-encoded
+// version that the remark pipeline corrupts by stripping the query string.
+n2m.setCustomTransformer("image", async (block: any) => {
+  const { image } = block;
+  const notionUrl = image.type === "file" ? image.file.url : image.external?.url;
+  if (!notionUrl) return false;
+  const caption = image.caption?.map((c: any) => c.plain_text).join("") ?? "";
+  try {
+    const cdnUrl = await toCdnUrl(notionUrl);
+    return `![${caption}](${cdnUrl})`;
+  } catch (e) {
+    console.error("[notion] failed to proxy image to Cloudinary:", e);
+    return `![${caption}](${notionUrl})`;
+  }
+});
 
 export const getPersonal = cache(async () => {
   const response = await notion.databases.query({
@@ -222,13 +203,9 @@ export const getNotionPostMarkdown = cache(async (slug: string) => {
 
   // Cap standalone images (no existing style = not already wrapped from columns)
   // and wrap in a skeleton container to reserve space while loading.
-  const wrapped = raw.replace(/<img (?![^>]*style=)([^>]*)>/g, (_, attrs) =>
+  const html = raw.replace(/<img (?![^>]*style=)([^>]*)>/g, (_, attrs) =>
     `<span class="img-skeleton"><img loading="lazy" decoding="async" onload="this.style.opacity='1';this.parentElement.classList.add('img-loaded')" style="opacity:0;transition:opacity 0.4s ease;max-height:600px;width:auto;max-width:100%;display:block;margin:0 auto;" ${attrs}></span>`
   );
-
-  // Rewrite expiring Notion S3 URLs to permanent Cloudinary URLs so browsers
-  // can cache images across navigations and ISR re-renders.
-  const html = await rewriteNotionImages(wrapped);
 
   return {
     html,

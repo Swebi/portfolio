@@ -118,21 +118,22 @@ Full blog post pipeline — the expensive path:
 
 **Column layout:** Notion `column_list` blocks are resolved in step 3. Each column's markdown is converted to HTML independently, images are wrapped with skeleton markup, and the columns are assembled into a `display:flex` div before being embedded in the final markdown. `remark-rehype` with `allowDangerousHtml: true` passes this raw HTML through untouched.
 
-**Image proxying (`rewriteNotionImages`):**
+**Image proxying (custom `n2m` transformer):**
 Notion inline image URLs are time-limited signed S3 URLs (`X-Amz-Signature`, ~1h TTL). Every fresh Notion API call returns new tokens, so the URL changes each render — breaking browser caching and causing image reloads on back-navigation.
 
-Fix: at render time, each Notion image URL is rewritten to a permanent Cloudinary URL.
+Fix: a custom `notion-to-md` image transformer intercepts each image block during `pageToMarkdown`, before the URL touches the remark/rehype pipeline (which was stripping S3 query params). The raw Notion API URL is uploaded to Cloudinary and the permanent CDN URL is embedded in the markdown instead.
 
 ```
-notionUrl → SHA-256 hash of URL pathname (24 hex chars) → public_id: portfolio/blog/<hash>
-                                    ↓
-         1. Check module-level imgUrlCache Map (process-lifetime, survives ISR re-renders)
-         2. On miss → cloudinary.api.resource(publicId)  ← fast check, no upload
-         3. If 404 → cloudinary.uploader.upload(notionUrl, { overwrite: false }) ← one-time upload
-         4. Cache result in imgUrlCache, return secure_url
+n2m image block transformer (raw Notion S3 URL)
+  → toCdnUrl(notionUrl)
+      1. Check module-level imgUrlCache Map (process-lifetime, survives ISR re-renders)
+      2. On miss → cloudinary.api.resource(publicId)  ← fast check, no upload
+      3. If 404 → fetch(notionUrl) → upload_stream to Cloudinary
+      4. Cache result in imgUrlCache, return secure_url
+  → embed Cloudinary URL in markdown as ![caption](cdnUrl)
 ```
 
-Same image + same pathname = same `public_id` = same Cloudinary URL, forever. New deployments hit step 2 (fast API check, no re-upload). Browser caches `res.cloudinary.com` URLs normally.
+`public_id` = `portfolio/blog/<SHA-256 of URL pathname, 24 hex chars>` — same image + same pathname = same Cloudinary URL, forever. New deployments hit step 2 (fast API check, no re-upload). Browser caches `res.cloudinary.com` URLs normally.
 
 ---
 

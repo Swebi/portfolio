@@ -19,6 +19,8 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
+import { CmdKHint } from "@/components/cmd-k-hint";
+import { CopyEmailButton } from "@/components/copy-email-button";
 
 export default async function Navbar() {
   const personal = await getPersonal();
@@ -35,7 +37,7 @@ export default async function Navbar() {
   const socials = [
     { href: personal.github, icon: GithubIcon, label: "GitHub" },
     { href: personal.linkedin, icon: LinkedinIcon, label: "LinkedIn" },
-    { href: personal.instagram, icon: InstagramIcon, label: "Instagram" },
+    // { href: personal.instagram, icon: InstagramIcon, label: "Instagram" },
     { href: personal.twitter, icon: Twitter, label: "Twitter" },
     { href: personal.youtube, icon: Youtube, label: "Youtube" },
   ];
@@ -67,6 +69,18 @@ export default async function Navbar() {
           </DockIcon>
         ))}
         <Separator orientation="vertical" className="h-full" />
+        {personal.email && (
+          <DockIcon>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <CopyEmailButton email={personal.email} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Email</p>
+              </TooltipContent>
+            </Tooltip>
+          </DockIcon>
+        )}
         {socials
           .filter((social) => social.href !== "")
           .map((item) => (
@@ -95,10 +109,24 @@ export default async function Navbar() {
         <DockIcon>
           <Tooltip>
             <TooltipTrigger asChild>
-              <ModeToggle />
+              <span className="flex items-center justify-center">
+                <ModeToggle />
+              </span>
             </TooltipTrigger>
             <TooltipContent>
               <p>Theme</p>
+            </TooltipContent>
+          </Tooltip>
+        </DockIcon>
+        <DockIcon>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center justify-center">
+                <CmdKHint />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>⌘K</p>
             </TooltipContent>
           </Tooltip>
         </DockIcon>

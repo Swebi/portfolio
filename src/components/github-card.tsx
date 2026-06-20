@@ -9,7 +9,12 @@ const GithubCard = ({ username }: { username: string }) => {
   const [total, setTotal] = useState<number | null>(null);
 
   return (
-    <div className="rounded-xl border bg-[hsl(0,0%,100%)] dark:bg-card flex flex-col gap-2.5 p-3">
+    <a
+      href={`https://github.com/${username}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="rounded-xl border bg-[hsl(0,0%,100%)] dark:bg-card flex flex-col gap-2.5 p-3 cursor-pointer hover:border-foreground/20 transition-colors"
+    >
       <div className="rounded-lg bg-black/[0.045] dark:bg-white/[0.03] flex items-center justify-center p-4 min-h-[180px]">
         <GitHubCalendar
           username={username}
@@ -33,7 +38,7 @@ const GithubCard = ({ username }: { username: string }) => {
           {total !== null ? `${total.toLocaleString()} contributions this year` : "loading…"}
         </span>
       </div>
-    </div>
+    </a>
   );
 };
 

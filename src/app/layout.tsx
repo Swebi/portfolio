@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar";
+import { EasterEggs } from "@/components/easter-eggs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClickEffect } from "@/components/ui/click-effect";
 import { CustomCursor } from "@/components/ui/custom-cursor";
@@ -80,6 +81,7 @@ export default function RootLayout({
             <SectionLabel />
             {children}
             <Navbar />
+            <EasterEggs />
           </TooltipProvider>
         </ThemeProvider>
       </body>

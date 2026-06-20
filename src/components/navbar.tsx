@@ -71,14 +71,7 @@ export default async function Navbar() {
         <Separator orientation="vertical" className="h-full" />
         {personal.email && (
           <DockIcon>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <CopyEmailButton email={personal.email} />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Email</p>
-              </TooltipContent>
-            </Tooltip>
+            <CopyEmailButton email={personal.email} />
           </DockIcon>
         )}
         {socials

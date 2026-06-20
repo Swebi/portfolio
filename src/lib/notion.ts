@@ -6,6 +6,7 @@ import { NotionToMarkdown } from "notion-to-md";
 import { markdownToHTML } from "@/lib/markdown";
 import { v2 as cloudinary } from "cloudinary";
 import crypto from "crypto";
+import sharp from "sharp";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -32,10 +33,18 @@ async function toCdnUrl(notionUrl: string): Promise<string> {
     imgUrlCache.set(publicId, existing.secure_url);
     return existing.secure_url;
   } catch {
-    const uploaded = await cloudinary.uploader.upload(notionUrl, {
-      public_id: publicId,
-      overwrite: false,
-      resource_type: "image",
+    const response = await fetch(notionUrl);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const compressed = await sharp(buffer)
+      .resize({ width: 2000, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    const uploaded = await new Promise<any>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { public_id: publicId, overwrite: false, resource_type: "image" },
+        (err, res) => (err ? reject(err) : resolve(res))
+      );
+      stream.end(compressed);
     });
     imgUrlCache.set(publicId, uploaded.secure_url);
     return uploaded.secure_url;

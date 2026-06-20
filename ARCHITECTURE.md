@@ -7,6 +7,7 @@
 | Framework | Next.js 14 (App Router), deployed on Vercel |
 | CMS | Notion (3 databases) |
 | Media CDN | Cloudinary |
+| Image compression | Sharp (resize + WebP conversion before Cloudinary upload) |
 | Styling | Tailwind CSS + shadcn/ui (Radix primitives) |
 | Animations | Framer Motion |
 | Syntax highlighting | rehype-pretty-code + Shiki (`min-light` / `min-dark`) |
@@ -147,7 +148,9 @@ Notion page updated
   → Fetch full page from Notion API
   → Build property-ID → name map (Notion sends IDs not names in updated_properties)
   → For each file property that has content:
-      download from Notion S3 → upload to Cloudinary → write permanent URL back to Notion → clear file property
+      if image: fetch buffer → Sharp (resize ≤2000px wide, convert to WebP quality 82) → upload_stream to Cloudinary
+      if other: upload directly from Notion S3 URL to Cloudinary
+      → write permanent URL back to Notion → clear file property
   → revalidatePath('/')
      revalidatePath('/blog')
      revalidatePath('/blog/[slug]', 'page')

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import sharp from "sharp";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -91,13 +92,35 @@ export async function POST(request: NextRequest) {
 
     console.log(`[webhook] ${fileProp}: uploading "${fileName}" to Cloudinary (resource_type=${resourceType})...`);
 
-    const result = await cloudinary.uploader.upload(fileUrl, {
-      resource_type: resourceType,
-      folder: "portfolio",
-      use_filename: true,
-      unique_filename: true,
-      access_mode: "public",
-    });
+    let result;
+    try {
+      if (resourceType === "image") {
+        const response = await fetch(fileUrl);
+        const buffer = Buffer.from(await response.arrayBuffer());
+        const compressed = await sharp(buffer)
+          .resize({ width: 2000, withoutEnlargement: true })
+          .webp({ quality: 82 })
+          .toBuffer();
+        console.log(`[webhook] ${fileProp}: compressed to ${(compressed.length / 1024 / 1024).toFixed(2)} MB`);
+        result = await new Promise<any>((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { resource_type: "image", folder: "portfolio", use_filename: true, unique_filename: true },
+            (err, res) => err ? reject(err) : resolve(res)
+          );
+          stream.end(compressed);
+        });
+      } else {
+        result = await cloudinary.uploader.upload(fileUrl, {
+          resource_type: resourceType,
+          folder: "portfolio",
+          use_filename: true,
+          unique_filename: true,
+        });
+      }
+    } catch (err: any) {
+      console.error(`[webhook] ${fileProp}: Cloudinary upload failed:`, err?.message ?? err, err?.http_code, err?.error);
+      continue;
+    }
 
     console.log(`[webhook] ${fileProp}: uploaded → ${result.secure_url}`);
 

@@ -239,16 +239,6 @@ Instead, each `<img>` is wrapped at render time:
 
 ---
 
-## Unused / Legacy
-
-| File | Status |
-|---|---|
-| `content/hello-world.mdx` | Not wired up — Notion is the blog CMS |
-| `src/components/mdx.tsx` | Unused — leftover from MDX-based blog era |
-| `src/components/location-card.tsx` | Unused — Google Maps iframe, not referenced in any page |
-
----
-
 ## Environment Variables
 
 ```bash
@@ -263,4 +253,8 @@ CLOUDINARY_API_SECRET
 REVALIDATE                # ISR interval for home page (default: 86400)
 KV_REST_API_URL           # Upstash Redis REST URL (via Vercel → Storage → Upstash)
 KV_REST_API_TOKEN         # Upstash Redis auth token
+KV_REST_API_READ_ONLY_TOKEN
+KV_URL
+REDIS_URL
+
 ```

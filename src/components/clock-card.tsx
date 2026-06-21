@@ -112,15 +112,17 @@ const ClockCard = ({ timezone }: ClockCardProps) => {
           <circle cx="50" cy="50" r="1" style={{ fill: "hsl(var(--border))" }} />
         </svg>
       </div>
-      <div className="flex items-center gap-1.5 px-0.5">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted-foreground">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-        <span ref={timeRef} className="text-xs font-medium tabular-nums">
-          --:-- --
-        </span>
-        <span className="text-xs font-medium text-muted-foreground">• {tzAbbr}</span>
+      <div className="flex flex-col gap-0.5 px-0.5">
+        <div className="flex items-center gap-1.5">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted-foreground">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span ref={timeRef} className="text-xs font-medium tabular-nums">
+            --:-- --
+          </span>
+        </div>
+        <span className="text-xs text-muted-foreground pl-[14px]">{tzAbbr}</span>
       </div>
     </div>
   );

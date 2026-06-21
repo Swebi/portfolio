@@ -38,10 +38,16 @@ export function FooterStats({ buildTime }: { buildTime: number }) {
     daysAgo === 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
 
   return (
-    <footer className="text-xs text-muted-foreground text-center pt-8 space-y-1">
+    <footer className="text-xs text-muted-foreground text-center pt-8 pb-6 sm:pb-0 space-y-1">
       <div>
         Built with Next.js · Deployed on Vercel
-        {loadTime !== null && ` · Page loaded in ${loadTime}ms`}
+        {loadTime !== null && (
+          <>
+            <span className="hidden sm:inline"> · </span>
+            <br className="sm:hidden" />
+            Page loaded in {loadTime}ms
+          </>
+        )}
       </div>
       <div>
         Last updated {lastUpdated}

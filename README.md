@@ -2,13 +2,15 @@
 
 A dynamic and easily maintainable portfolio website powered by Notion as a CMS. The portfolio fetches data from a Notion database and renders it seamlessly using Next.js.
 
-Template Credits : https://magicui.design/docs/templates/portfolio
+Built on top of  https://magicui.design/docs/templates/portfolio
 
 ## App Preview
+<img width="1440" height="787" alt="image" src="https://github.com/user-attachments/assets/9cd473dd-772c-4b5b-96fd-f77095d3c68b" />
 
-![image](https://github.com/user-attachments/assets/315f4194-53fa-4f13-a611-a0dd4addb610)
+<img width="1440" height="791" alt="image" src="https://github.com/user-attachments/assets/3433ca3a-393b-4c43-9f3b-39753d5006f0" />
 
-![image](https://github.com/user-attachments/assets/d5fc22ea-8e23-4d02-9807-9706f5942d23)
+<img width="1440" height="791" alt="image" src="https://github.com/user-attachments/assets/197533a9-40a2-4a9a-bc8f-9b6668d3e05f" />
+
 
 Notion CMS
 
